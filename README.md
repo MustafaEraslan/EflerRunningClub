@@ -60,7 +60,7 @@ iOS derlemesi için Apple Developer imzalama ekibi ve provisioning profile Xcode
 - KVKK ekranındaki yayın bağlantısını gerçek aydınlatma metni URL'siyle değiştirin.
 - İlk admin ve antrenör rollerini yukarıdaki SQL ile atayın.
 - `supabase/seed.sql` dosyasını üretimde çalıştırmayın.
-- Müşterinin gerçek ikonunu `assets/icon/icon.png` ile değiştirip `dart run flutter_launcher_icons` çalıştırın.
+- Resmî kulüp logosu `assets/icon/icon.png` dosyasındadır; değişirse `dart run flutter_launcher_icons` çalıştırın.
 
 ## Fazlar
 
