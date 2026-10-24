@@ -1,0 +1,188 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../core/providers/providers.dart';
+
+enum AuthMode { login, register, forgot }
+
+class AuthScreen extends ConsumerStatefulWidget {
+  const AuthScreen({required this.mode, super.key});
+  final AuthMode mode;
+
+  @override
+  ConsumerState<AuthScreen> createState() => _AuthScreenState();
+}
+
+class _AuthScreenState extends ConsumerState<AuthScreen> {
+  final email = TextEditingController();
+  final password = TextEditingController();
+  final fullName = TextEditingController();
+  bool consent = false;
+  bool loading = false;
+  String? error;
+
+  @override
+  void dispose() {
+    email.dispose();
+    password.dispose();
+    fullName.dispose();
+    super.dispose();
+  }
+
+  Future<void> submit() async {
+    if (widget.mode == AuthMode.register && !consent) {
+      setState(() => error = 'Devam etmek için KVKK metnini onaylamalısın.');
+      return;
+    }
+    setState(() {
+      loading = true;
+      error = null;
+    });
+    try {
+      final repo = ref.read(repositoryProvider);
+      if (widget.mode == AuthMode.login) {
+        await repo.signIn(email.text, password.text);
+        if (mounted) context.go('/home');
+      } else if (widget.mode == AuthMode.register) {
+        await repo.signUp(
+          email: email.text,
+          password: password.text,
+          fullName: fullName.text,
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Kayıt tamamlandı. E-posta doğrulama bağlantını kontrol et.',
+              ),
+            ),
+          );
+          context.go('/login');
+        }
+      } else {
+        await repo.resetPassword(email.text);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Şifre yenileme bağlantısı gönderildi.'),
+            ),
+          );
+        }
+      }
+    } catch (_) {
+      setState(
+        () => error =
+            'İşlem tamamlanamadı. Bilgilerini ve internet bağlantını kontrol et.',
+      );
+    } finally {
+      if (mounted) setState(() => loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final title = switch (widget.mode) {
+      AuthMode.login => 'Tekrar hoş geldin',
+      AuthMode.register => 'Kulübe katıl',
+      AuthMode.forgot => 'Şifreni yenile',
+    };
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Image.asset('assets/icon/icon.png', height: 112),
+                  const SizedBox(height: 24),
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.headlineMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  if (widget.mode == AuthMode.register) ...[
+                    TextField(
+                      controller: fullName,
+                      textInputAction: TextInputAction.next,
+                      decoration: const InputDecoration(labelText: 'Ad soyad'),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  TextField(
+                    controller: email,
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    decoration: const InputDecoration(labelText: 'E-posta'),
+                  ),
+                  if (widget.mode != AuthMode.forgot) ...[
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: password,
+                      obscureText: true,
+                      decoration: const InputDecoration(labelText: 'Şifre'),
+                    ),
+                  ],
+                  if (widget.mode == AuthMode.register) ...[
+                    CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      value: consent,
+                      onChanged: (value) =>
+                          setState(() => consent = value ?? false),
+                      title: const Text(
+                        'KVKK Aydınlatma Metni’ni okudum ve kabul ediyorum.',
+                      ),
+                      subtitle: const Text(
+                        'Metin bağlantısı yayın öncesi eklenecek.',
+                      ),
+                    ),
+                  ],
+                  if (error != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        error!,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ),
+                  FilledButton(
+                    onPressed: loading ? null : submit,
+                    child: Text(
+                      loading
+                          ? 'Lütfen bekle…'
+                          : widget.mode == AuthMode.login
+                          ? 'Giriş yap'
+                          : widget.mode == AuthMode.register
+                          ? 'Kayıt ol'
+                          : 'Bağlantı gönder',
+                    ),
+                  ),
+                  if (widget.mode == AuthMode.login) ...[
+                    TextButton(
+                      onPressed: () => context.go('/forgot'),
+                      child: const Text('Şifremi unuttum'),
+                    ),
+                    TextButton(
+                      onPressed: () => context.go('/register'),
+                      child: const Text('Hesabın yok mu? Kayıt ol'),
+                    ),
+                  ] else
+                    TextButton(
+                      onPressed: () => context.go('/login'),
+                      child: const Text('Giriş ekranına dön'),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
