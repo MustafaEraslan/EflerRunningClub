@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/providers/providers.dart';
 
@@ -21,13 +24,57 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   bool consent = false;
   bool loading = false;
   String? error;
+  StreamSubscription<AuthState>? authSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((
+      state,
+    ) async {
+      if (state.event != AuthChangeEvent.signedIn || !mounted) return;
+      try {
+        await ref.read(repositoryProvider).ensureSocialProfile();
+        ref.invalidate(profileProvider);
+        if (mounted) context.go('/home');
+      } catch (_) {
+        if (mounted) {
+          setState(() => error = 'Kulüp profili oluşturulamadı. Tekrar dene.');
+        }
+      }
+    });
+  }
 
   @override
   void dispose() {
     email.dispose();
     password.dispose();
     fullName.dispose();
+    authSubscription?.cancel();
     super.dispose();
+  }
+
+  Future<void> socialSignIn(OAuthProvider provider) async {
+    if (!consent) {
+      setState(() => error = 'Devam etmek için KVKK metnini onaylamalısın.');
+      return;
+    }
+    setState(() {
+      loading = true;
+      error = null;
+    });
+    try {
+      await ref.read(repositoryProvider).signInWithSocialProvider(provider);
+    } catch (_) {
+      if (mounted) {
+        setState(
+          () => error =
+              'Sosyal giriş başlatılamadı. Sağlayıcı ayarlarını kontrol et.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => loading = false);
+    }
   }
 
   Future<void> submit() async {
@@ -164,6 +211,44 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     ),
                   ),
                   if (widget.mode == AuthMode.login) ...[
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: Row(
+                        children: [
+                          Expanded(child: Divider()),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12),
+                            child: Text('veya'),
+                          ),
+                          Expanded(child: Divider()),
+                        ],
+                      ),
+                    ),
+                    CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      value: consent,
+                      onChanged: loading
+                          ? null
+                          : (value) => setState(() => consent = value ?? false),
+                      title: const Text(
+                        'KVKK Aydınlatma Metni’ni okudum ve kabul ediyorum.',
+                      ),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: loading
+                          ? null
+                          : () => socialSignIn(OAuthProvider.google),
+                      icon: const Icon(Icons.g_mobiledata, size: 28),
+                      label: const Text('Google ile devam et'),
+                    ),
+                    const SizedBox(height: 10),
+                    OutlinedButton.icon(
+                      onPressed: loading
+                          ? null
+                          : () => socialSignIn(OAuthProvider.apple),
+                      icon: const Icon(Icons.apple),
+                      label: const Text('Apple ile devam et'),
+                    ),
                     TextButton(
                       onPressed: () => context.go('/forgot'),
                       child: const Text('Şifremi unuttum'),

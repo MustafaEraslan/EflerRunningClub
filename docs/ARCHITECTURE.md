@@ -24,6 +24,8 @@ Her tabloda sabit `app_id = 'efeler'` kontrolü vardır. Profil tetikleyicisi ya
 - `efeler_check_in`: token, süre, koşu durumu ve mükerrer katılımı doğrular; katılım ile puanı atomik yazar.
 - `efeler_redeem`: ödül satırını kilitler; bakiye/stok kontrolü sonrası stok, puan ve talebi atomik günceller.
 - `efeler_set_run_status`: antrenör/yönetici koşuyu açar veya kapatır.
+- `efeler_create_run`: antrenör/yönetici gelecek tarihli koşu planlar.
+- `efeler_ensure_profile`: Google/Apple ile ilk girişte KVKK onaylı Efeler profilini oluşturur.
 - `efeler_mark_delivered`, `efeler_cancel_request`, `efeler_adjust_points`: yönetici operasyonları.
 - `efeler_delete_account`: Efeler verilerini siler. Metadata Efeler'i tek uygulama olarak gösteriyorsa auth kaydını silmeyi dener; başka uygulama FK'sı varsa auth kaydını güvenle korur.
 

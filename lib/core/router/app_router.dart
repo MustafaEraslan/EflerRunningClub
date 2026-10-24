@@ -5,6 +5,7 @@ import '../../features/auth/auth_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/profile/profile_screen.dart';
 import '../../features/runs/qr_screen.dart';
+import '../../features/runs/run_form_screen.dart';
 import '../../features/runs/scanner_screen.dart';
 
 final appRouter = GoRouter(
@@ -34,6 +35,7 @@ final appRouter = GoRouter(
     ),
     GoRoute(path: '/home', builder: (_, _) => const HomeScreen()),
     GoRoute(path: '/scanner', builder: (_, _) => const ScannerScreen()),
+    GoRoute(path: '/runs/new', builder: (_, _) => const RunFormScreen()),
     GoRoute(
       path: '/qr/:runId',
       builder: (_, state) => QrScreen(runId: state.pathParameters['runId']!),

@@ -14,7 +14,8 @@ Efeler Running Club'ın atlet, antrenör ve yönetici deneyimlerini tek Flutter 
 Migration'ları Supabase SQL Editor'da dosya adı sırasıyla çalıştırın:
 
 1. `supabase/migrations/20261024180000_efeler_core.sql`
-2. İsteğe bağlı, yalnızca geliştirme ortamında: `supabase/seed.sql`
+2. `supabase/migrations/20261024190000_efeler_social_and_coach.sql`
+3. İsteğe bağlı, yalnızca geliştirme ortamında: `supabase/seed.sql`
 
 Migration tekrar çalıştırılabilir ve ortak projedeki mevcut nesneleri değiştirmez; oluşturduğu tüm tablo, görünüm, fonksiyon, politika ve tetikleyiciler `efeler_` öneklidir. İlk yönetici hesabını uygulamada kaydettikten sonra SQL Editor'da bir kez şu sorguyla yetkilendirin:
 
@@ -55,6 +56,8 @@ iOS derlemesi için Apple Developer imzalama ekibi ve provisioning profile Xcode
 ## Manuel dashboard adımları
 
 - Authentication > Providers bölümünde e-posta/şifre girişini etkinleştirin.
+- Authentication > Providers altında Google ve Apple sağlayıcılarını etkinleştirin. Google Cloud'da Web OAuth istemcisine Supabase callback URL'sini; Apple Developer'da App ID/Services ID ve Sign in with Apple ayarlarını tanımlayın.
+- Authentication > URL Configuration > Redirect URLs listesine `com.efelerrunningclub.app://login-callback` ekleyin.
 - Üretimde özel SMTP sağlayıcısı tanımlayın; ücretsiz geliştirmede Supabase'in limitli e-posta servisi kullanılabilir.
 - Authentication > URL Configuration altında mobil deep link ve ilerideki web paneli alan adını redirect URL olarak ekleyin.
 - KVKK ekranındaki yayın bağlantısını gerçek aydınlatma metni URL'siyle değiştirin.

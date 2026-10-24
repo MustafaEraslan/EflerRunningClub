@@ -35,6 +35,17 @@ class ClubRepository {
 
   Future<void> signOut() => client.auth.signOut();
 
+  Future<void> signInWithSocialProvider(OAuthProvider provider) => client.auth
+      .signInWithOAuth(
+        provider,
+        redirectTo: 'com.efelerrunningclub.app://login-callback',
+        authScreenLaunchMode: LaunchMode.externalApplication,
+      )
+      .then((_) {});
+
+  Future<void> ensureSocialProfile() =>
+      client.rpc('efeler_ensure_profile').then((_) {});
+
   Future<Profile> getProfile() async {
     final data = await client
         .from('efeler_profiles')
@@ -124,6 +135,23 @@ class ClubRepository {
       .rpc(
         'efeler_set_run_status',
         params: {'p_run_id': runId, 'p_status': status},
+      )
+      .then((_) {});
+
+  Future<void> createRun({
+    required String title,
+    required DateTime startsAt,
+    required String location,
+    required int points,
+  }) => client
+      .rpc(
+        'efeler_create_run',
+        params: {
+          'p_title': title.trim(),
+          'p_starts_at': startsAt.toUtc().toIso8601String(),
+          'p_location': location.trim(),
+          'p_points': points,
+        },
       )
       .then((_) {});
 

@@ -25,10 +25,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       const PointsTab(),
       const RequestsTab(),
     ];
+    final canManageRuns =
+        ref.watch(profileProvider).asData?.value.canManageRuns == true;
     return Scaffold(
       appBar: AppBar(
         title: Text(titles[index]),
         actions: [
+          if (index == 0 && canManageRuns)
+            IconButton(
+              onPressed: () => context.push('/runs/new'),
+              icon: const Icon(Icons.event_available),
+              tooltip: 'Koşu planla',
+            ),
           IconButton(
             onPressed: () => context.push('/profile'),
             icon: const Icon(Icons.person_outline),
