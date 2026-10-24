@@ -9,12 +9,17 @@ String checkInMessage(String code) => switch (code) {
   _ => 'İşlem tamamlanamadı. Lütfen tekrar dene.',
 };
 
+// success message is handled separately (pink accent) — not used for the
+// 'success' code here; kept as a fallback only.
 String reservationMessage(String code) => switch (code) {
-  'success' => 'Koşudaki yerin ayrıldı. Görüşmek üzere!',
+  'success' => 'Tebrikler, rezervasyonun tamamlandı.',
   'already_reserved' => 'Bu koşuya zaten rezervasyon yaptın.',
   'run_full' => 'Bu koşunun kontenjanı doldu.',
   'run_closed' => 'Bu koşu rezervasyona kapalı.',
   'cancelled' => 'Rezervasyonun iptal edildi.',
+  'no_profile' => 'Efeler Running Club profilin bulunamadı.',
+  'unknown' => 'Rezervasyon bulunamadı veya iptal edilemedi.',
+  'offline' => 'İnternet bağlantısı yok. Lütfen bağlantını kontrol et.',
   _ => 'Rezervasyon işlemi tamamlanamadı. Tekrar dene.',
 };
 

@@ -89,10 +89,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-class RunsTab extends ConsumerWidget {
+class RunsTab extends ConsumerStatefulWidget {
   const RunsTab({super.key});
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RunsTab> createState() => _RunsTabState();
+}
+
+class _RunsTabState extends ConsumerState<RunsTab> {
+  String? _loadingRunId;
+
+  @override
+  Widget build(BuildContext context) {
     final profile = ref.watch(profileProvider).value;
     return _AsyncList<ClubRun>(
       value: ref.watch(runsProvider),
@@ -234,21 +241,45 @@ class RunsTab extends ConsumerWidget {
                       : () => _showQr(context, ref, run),
                 )
               else
-                FilledButton(
-                  onPressed:
-                      run.status == 'closed' ||
-                          (!run.isReserved && run.availableSpots <= 0)
-                      ? null
-                      : () => _toggleReservation(context, ref, run),
-                  style: run.isReserved
-                      ? FilledButton.styleFrom(
-                          backgroundColor: const Color(0xFF343036),
-                          foregroundColor: Colors.white,
-                        )
-                      : null,
-                  child: Text(
-                    run.isReserved ? 'REZERVASYONU İPTAL ET' : 'YERİNİ AYIRT',
-                  ),
+                Builder(
+                  builder: (context) {
+                    final isLoading = _loadingRunId == run.id;
+                    final isPast = run.startsAt.isBefore(DateTime.now());
+                    // Disable when: past start, no spots available,
+                    // closed status, or already in-flight.
+                    final disabled =
+                        isLoading ||
+                        run.status == 'closed' ||
+                        isPast ||
+                        (!run.isReserved && run.availableSpots <= 0);
+                    return FilledButton(
+                      onPressed: disabled
+                          ? null
+                          : () => _toggleReservation(context, ref, run),
+                      style: run.isReserved
+                          ? FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFF343036),
+                              foregroundColor: Colors.white,
+                            )
+                          : null,
+                      child: isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(
+                              run.isReserved
+                                  ? 'REZERVASYONU İPTAL ET'
+                                  : isPast
+                                  ? 'KOŞU BAŞLADI'
+                                  : 'YERİNİ AYIRT',
+                            ),
+                    );
+                  },
                 ),
             ],
           ),
@@ -309,15 +340,50 @@ class RunsTab extends ConsumerWidget {
     WidgetRef ref,
     ClubRun run,
   ) async {
-    final repo = ref.read(repositoryProvider);
-    final code = run.isReserved
-        ? await repo.cancelReservation(run.id)
-        : await repo.reserveRun(run.id);
-    ref.invalidate(runsProvider);
-    if (context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(reservationMessage(code))));
+    if (_loadingRunId != null) return; // ignore double-taps
+    setState(() => _loadingRunId = run.id);
+    try {
+      final repo = ref.read(repositoryProvider);
+      final code = run.isReserved
+          ? await repo.cancelReservation(run.id)
+          : await repo.reserveRun(run.id);
+      // Always re-fetch state from server so button label is authoritative.
+      ref.invalidate(runsProvider);
+      if (!context.mounted) return;
+
+      if (code == 'success') {
+        // Task 8: success in pink accent.
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Tebrikler, rezervasyonun tamamlandı.',
+              style: TextStyle(
+                color: Color(0xFFFF5ABB),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            backgroundColor: const Color(0xFF1B1B1F),
+          ),
+        );
+      } else if (code == 'cancelled') {
+        // Task 8: cancellation keeps current muted style.
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(reservationMessage(code))),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(reservationMessage(code))),
+        );
+      }
+    } catch (_) {
+      ref.invalidate(runsProvider);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(reservationMessage('offline'))),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loadingRunId = null);
     }
   }
 }
