@@ -67,11 +67,28 @@ class _RewardFormScreenState extends ConsumerState<RewardFormScreen> {
         pointsCost: pointValue,
         stock: stockValue,
       );
+      var imageFailed = false;
       if (imageBytes != null) {
-        await repo.uploadRewardImage(rewardId, imageBytes!);
+        try {
+          await repo.uploadRewardImage(rewardId, imageBytes!);
+        } catch (_) {
+          imageFailed = true;
+        }
       }
       ref.invalidate(rewardsProvider);
-      if (mounted) context.pop();
+      if (mounted) {
+        final messenger = ScaffoldMessenger.of(context);
+        context.pop();
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              imageFailed
+                  ? 'Ödül kaydedildi; görsel yüklenemedi.'
+                  : 'Ödül başarıyla yayınlandı.',
+            ),
+          ),
+        );
+      }
     } catch (_) {
       if (mounted) setState(() => error = 'Ödül kaydedilemedi. Tekrar dene.');
     } finally {
