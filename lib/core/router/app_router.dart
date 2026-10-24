@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../models/models.dart';
 import '../../features/auth/auth_screen.dart';
 import '../../features/auth/reset_password_screen.dart';
 import '../../features/home/home_screen.dart';
@@ -44,7 +45,12 @@ final appRouter = GoRouter(
     ),
     GoRoute(path: '/home', builder: (_, _) => const HomeScreen()),
     GoRoute(path: '/scanner', builder: (_, _) => const ScannerScreen()),
-    GoRoute(path: '/runs/new', builder: (_, _) => const RunFormScreen()),
+    GoRoute(
+      path: '/runs/new',
+      builder: (_, state) => RunFormScreen(
+        run: state.extra as ClubRun?,
+      ),
+    ),
     GoRoute(
       path: '/qr/:runId',
       builder: (_, state) => QrScreen(runId: state.pathParameters['runId']!),
@@ -52,6 +58,11 @@ final appRouter = GoRouter(
     GoRoute(path: '/profile', builder: (_, _) => const ProfileScreen()),
     GoRoute(path: '/profile/edit', builder: (_, _) => const EditProfileScreen()),
     GoRoute(path: '/team', builder: (_, _) => const TeamScreen()),
-    GoRoute(path: '/rewards/new', builder: (_, _) => const RewardFormScreen()),
+    GoRoute(
+      path: '/rewards/new',
+      builder: (_, state) => RewardFormScreen(
+        reward: state.extra as Reward?,
+      ),
+    ),
   ],
 );

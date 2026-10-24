@@ -325,6 +325,50 @@ class ClubRepository {
       )
       .then((_) {});
 
+  Future<void> updateRun({
+    required String runId,
+    required String title,
+    required DateTime startsAt,
+    required String location,
+    required int points,
+    required int capacity,
+  }) => client
+      .rpc(
+        'efeler_update_run',
+        params: {
+          'p_run_id': runId,
+          'p_title': title.trim(),
+          'p_starts_at': startsAt.toUtc().toIso8601String(),
+          'p_location': location.trim(),
+          'p_points': points,
+          'p_capacity': capacity,
+        },
+      )
+      .then((_) {});
+
+  Future<void> updateReward({
+    required String rewardId,
+    required String name,
+    required String description,
+    required int pointsCost,
+    required int stock,
+  }) => client
+      .rpc(
+        'efeler_update_reward',
+        params: {
+          'p_reward_id': rewardId,
+          'p_name': name.trim(),
+          'p_description': description.trim(),
+          'p_points_cost': pointsCost,
+          'p_stock': stock,
+        },
+      )
+      .then((_) {});
+
+  Future<void> deleteReward(String rewardId) => client
+      .rpc('efeler_delete_reward', params: {'p_reward_id': rewardId})
+      .then((_) {});
+
   Future<String> reserveRun(String runId) async {
     final data = await client.rpc(
       'efeler_reserve_run',

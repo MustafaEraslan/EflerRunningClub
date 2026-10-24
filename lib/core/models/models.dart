@@ -113,6 +113,7 @@ class ClubRun {
     required this.capacity,
     required this.reservedCount,
     required this.isReserved,
+    required this.createdBy,
     required this.coachName,
     required this.coachBio,
     required this.coachAvatarPath,
@@ -127,6 +128,7 @@ class ClubRun {
   final int capacity;
   final int reservedCount;
   final bool isReserved;
+  final String? createdBy;
   final String coachName;
   final String coachBio;
   final String? coachAvatarPath;
@@ -142,6 +144,7 @@ class ClubRun {
     capacity: capacity,
     reservedCount: reservedCount,
     isReserved: isReserved,
+    createdBy: createdBy,
     coachName: coachName,
     coachBio: coachBio,
     coachAvatarPath: coachAvatarPath,
@@ -157,6 +160,7 @@ class ClubRun {
     capacity: (json['capacity'] as num?)?.toInt() ?? 50,
     reservedCount: (json['reserved_count'] as num?)?.toInt() ?? 0,
     isReserved: json['is_reserved'] as bool? ?? false,
+    createdBy: json['created_by'] as String?,
     coachName: json['coach_name'] as String? ?? 'Antrenör',
     coachBio: json['coach_bio'] as String? ?? '',
     coachAvatarPath: json['coach_avatar_path'] as String?,

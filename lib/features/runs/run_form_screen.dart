@@ -2,24 +2,40 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/models/models.dart';
 import '../../core/providers/providers.dart';
 import '../../core/widgets/compact_date_time_picker.dart';
 
 class RunFormScreen extends ConsumerStatefulWidget {
-  const RunFormScreen({super.key});
+  const RunFormScreen({super.key, this.run});
+  /// When non-null the form opens in edit mode for this run.
+  final ClubRun? run;
 
   @override
   ConsumerState<RunFormScreen> createState() => _RunFormScreenState();
 }
 
 class _RunFormScreenState extends ConsumerState<RunFormScreen> {
-  final title = TextEditingController();
-  final location = TextEditingController();
-  final points = TextEditingController(text: '10');
-  final capacity = TextEditingController(text: '30');
-  DateTime startsAt = DateTime.now().add(const Duration(days: 1));
+  late final TextEditingController title;
+  late final TextEditingController location;
+  late final TextEditingController points;
+  late final TextEditingController capacity;
+  late DateTime startsAt;
   bool saving = false;
   String? error;
+
+  bool get isEditing => widget.run != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final r = widget.run;
+    title = TextEditingController(text: r?.title ?? '');
+    location = TextEditingController(text: r?.location ?? '');
+    points = TextEditingController(text: '${r?.points ?? 10}');
+    capacity = TextEditingController(text: '${r?.capacity ?? 30}');
+    startsAt = r?.startsAt ?? DateTime.now().add(const Duration(days: 1));
+  }
 
   @override
   void dispose() {
@@ -71,22 +87,33 @@ class _RunFormScreenState extends ConsumerState<RunFormScreen> {
       error = null;
     });
     try {
-      await ref
-          .read(repositoryProvider)
-          .createRun(
-            title: title.text,
-            startsAt: startsAt,
-            location: location.text,
-            points: parsedPoints,
-            capacity: parsedCapacity,
-          );
+      final repo = ref.read(repositoryProvider);
+      if (isEditing) {
+        await repo.updateRun(
+          runId: widget.run!.id,
+          title: title.text,
+          startsAt: startsAt,
+          location: location.text,
+          points: parsedPoints,
+          capacity: parsedCapacity,
+        );
+      } else {
+        await repo.createRun(
+          title: title.text,
+          startsAt: startsAt,
+          location: location.text,
+          points: parsedPoints,
+          capacity: parsedCapacity,
+        );
+      }
       ref.invalidate(runsProvider);
       if (mounted) Navigator.pop(context);
     } catch (_) {
       if (mounted) {
         setState(
-          () => error =
-              'Koşu planlanamadı. Antrenör yetkini ve bağlantını kontrol et.',
+          () => error = isEditing
+              ? 'Koşu güncellenemedi. Tekrar dene.'
+              : 'Koşu planlanamadı. Antrenör yetkini ve bağlantını kontrol et.',
         );
       }
     } finally {
@@ -96,7 +123,9 @@ class _RunFormScreenState extends ConsumerState<RunFormScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Koşu planla')),
+    appBar: AppBar(
+      title: Text(isEditing ? 'Koşuyu düzenle' : 'Koşu planla'),
+    ),
     body: ListView(
       padding: const EdgeInsets.all(20),
       children: [
@@ -157,8 +186,14 @@ class _RunFormScreenState extends ConsumerState<RunFormScreen> {
           ),
         FilledButton.icon(
           onPressed: saving ? null : save,
-          icon: const Icon(Icons.add),
-          label: Text(saving ? 'Kaydediliyor…' : 'Koşuyu planla'),
+          icon: Icon(isEditing ? Icons.save : Icons.add),
+          label: Text(
+            saving
+                ? 'Kaydediliyor…'
+                : isEditing
+                    ? 'DEĞİŞİKLİKLERİ KAYDET'
+                    : 'Koşuyu planla',
+          ),
         ),
       ],
     ),

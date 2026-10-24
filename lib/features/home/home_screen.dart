@@ -228,18 +228,38 @@ class _RunsTabState extends ConsumerState<RunsTab> {
                 color: const Color(0xFFCCFF00),
               ),
               const SizedBox(height: 18),
-              if (profile?.canManageRuns == true)
-                FilledButton.icon(
-                  icon: const Icon(Icons.qr_code_2),
-                  label: Text(
-                    run.status == 'open'
-                        ? 'QR KODU GÖSTER'
-                        : 'KOŞUYU AÇ & QR OLUŞTUR',
-                  ),
-                  onPressed: run.status == 'closed'
-                      ? null
-                      : () => _showQr(context, ref, run),
-                )
+              if (profile?.canManageRuns == true) ...[
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton.icon(
+                        icon: const Icon(Icons.qr_code_2),
+                        label: Text(
+                          run.status == 'open'
+                              ? 'QR KODU GÖSTER'
+                              : 'KOŞUYU AÇ & QR OLUŞTUR',
+                        ),
+                        onPressed: run.status == 'closed'
+                            ? null
+                            : () => _showQr(context, ref, run),
+                      ),
+                    ),
+                    if (run.createdBy == profile?.id ||
+                        profile?.role == 'admin') ...[
+                      const SizedBox(width: 8),
+                      IconButton.filled(
+                        onPressed: () =>
+                            context.push('/runs/new', extra: run),
+                        icon: const Icon(Icons.edit_outlined),
+                        tooltip: 'Düzenle',
+                        style: IconButton.styleFrom(
+                          backgroundColor: const Color(0xFF343036),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ]
               else
                 Builder(
                   builder: (context) {
@@ -391,88 +411,100 @@ class _RunsTabState extends ConsumerState<RunsTab> {
 class RewardsTab extends ConsumerWidget {
   const RewardsTab({super.key});
   @override
-  Widget build(BuildContext context, WidgetRef ref) => _AsyncList<Reward>(
-    value: ref.watch(rewardsProvider),
-    empty: 'Şu anda aktif ödül yok.',
-    onRefresh: () => ref.refresh(rewardsProvider.future),
-    itemBuilder: (reward) => Card(
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (reward.imagePath != null)
-            Image.network(
-              ref.read(repositoryProvider).mediaUrl(reward.imagePath!),
-              height: 170,
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => const SizedBox.shrink(),
-            ),
-          // Explicit layout instead of ListTile: the theme's FilledButton has
-          // an infinite minimum width, which squeezed ListTile's title to ~0.
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (reward.imagePath == null) ...[
-                      const CircleAvatar(child: Icon(Icons.checkroom)),
-                      const SizedBox(width: 12),
-                    ],
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            reward.name,
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w800),
-                          ),
-                          if (reward.description.isNotEmpty) ...[
-                            const SizedBox(height: 4),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final canManage =
+        ref.watch(profileProvider).asData?.value.canManageRuns == true;
+    return _AsyncList<Reward>(
+      value: ref.watch(rewardsProvider),
+      empty: 'Şu anda aktif ödül yok.',
+      onRefresh: () => ref.refresh(rewardsProvider.future),
+      itemBuilder: (reward) => Card(
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (reward.imagePath != null)
+              Image.network(
+                ref.read(repositoryProvider).mediaUrl(reward.imagePath!),
+                height: 170,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => const SizedBox.shrink(),
+              ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (reward.imagePath == null) ...[
+                        const CircleAvatar(child: Icon(Icons.checkroom)),
+                        const SizedBox(width: 12),
+                      ],
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                             Text(
-                              reward.description,
-                              style: Theme.of(context).textTheme.bodyMedium,
+                              reward.name,
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w800),
                             ),
+                            if (reward.description.isNotEmpty) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                reward.description,
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        reward.stock > 0
-                            ? '${reward.stock} adet kaldı'
-                            : 'Stokta yok',
-                        style: Theme.of(context).textTheme.bodySmall,
+                      if (canManage)
+                        IconButton(
+                          onPressed: () => context.push(
+                            '/rewards/new',
+                            extra: reward,
+                          ),
+                          icon: const Icon(Icons.edit_outlined, size: 20),
+                          tooltip: 'Düzenle',
+                          visualDensity: VisualDensity.compact,
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          reward.stock > 0
+                              ? '${reward.stock} adet kaldı'
+                              : 'Stokta yok',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    FilledButton.tonal(
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size(64, 40),
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                      const SizedBox(width: 12),
+                      FilledButton.tonal(
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size(64, 40),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                        ),
+                        onPressed: reward.stock < 1
+                            ? null
+                            : () => _redeem(context, ref, reward),
+                        child: Text('${reward.pointsCost} puan'),
                       ),
-                      onPressed: reward.stock < 1
-                          ? null
-                          : () => _redeem(context, ref, reward),
-                      child: Text('${reward.pointsCost} puan'),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 
   Future<void> _redeem(
     BuildContext context,
