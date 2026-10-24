@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config/app_config.dart';
@@ -50,6 +54,36 @@ class ClubRepository {
       )
       .then((_) {});
 
+  Future<void> signInWithApple() async {
+    final rawNonce = client.auth.generateRawNonce();
+    final hashedNonce = sha256.convert(utf8.encode(rawNonce)).toString();
+    final credential = await SignInWithApple.getAppleIDCredential(
+      scopes: [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
+      ],
+      nonce: hashedNonce,
+    );
+    final idToken = credential.identityToken;
+    if (idToken == null) {
+      throw const AuthException('Apple kimlik bilgisi alınamadı.');
+    }
+    await client.auth.signInWithIdToken(
+      provider: OAuthProvider.apple,
+      idToken: idToken,
+      nonce: rawNonce,
+    );
+    final appleName = [
+      credential.givenName,
+      credential.familyName,
+    ].whereType<String>().where((part) => part.trim().isNotEmpty).join(' ');
+    if (appleName.isNotEmpty) {
+      await client.auth.updateUser(
+        UserAttributes(data: {'full_name': appleName}),
+      );
+    }
+  }
+
   Future<void> ensureSocialProfile() =>
       client.rpc('efeler_ensure_profile').then((_) {});
 
@@ -72,7 +106,8 @@ class ClubRepository {
 
   Future<List<ClubMember>> getMembers() async {
     final data = await client.rpc('efeler_list_members');
-    return data.map(ClubMember.fromJson).toList();
+    final rows = List<Map<String, dynamic>>.from(data as List);
+    return rows.map(ClubMember.fromJson).toList(growable: false);
   }
 
   Future<void> promoteToCoach(String memberId) => client
@@ -81,7 +116,8 @@ class ClubRepository {
 
   Future<List<ClubRun>> getRuns() async {
     final data = await client.rpc('efeler_list_runs');
-    return data.map(ClubRun.fromJson).toList();
+    final rows = List<Map<String, dynamic>>.from(data as List);
+    return rows.map(ClubRun.fromJson).toList(growable: false);
   }
 
   Future<List<Reward>> getRewards() async {
@@ -91,7 +127,8 @@ class ClubRepository {
         .eq('app_id', AppConfig.appId)
         .eq('active', true)
         .order('points_cost');
-    return data.map(Reward.fromJson).toList();
+    final rows = List<Map<String, dynamic>>.from(data);
+    return rows.map(Reward.fromJson).toList(growable: false);
   }
 
   Future<int> getBalance() async {

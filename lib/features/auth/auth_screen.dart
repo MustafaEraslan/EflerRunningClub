@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/providers/providers.dart';
@@ -76,6 +77,30 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           () => error =
               'Sosyal giriş başlatılamadı. Sağlayıcı ayarlarını kontrol et.',
         );
+      }
+    } finally {
+      if (mounted) setState(() => loading = false);
+    }
+  }
+
+  Future<void> appleSignIn() async {
+    if (!consent) {
+      setState(() => error = 'Devam etmek için KVKK metnini onaylamalısın.');
+      return;
+    }
+    setState(() {
+      loading = true;
+      error = null;
+    });
+    try {
+      await ref.read(repositoryProvider).signInWithApple();
+    } on SignInWithAppleAuthorizationException catch (exception) {
+      if (mounted && exception.code != AuthorizationErrorCode.canceled) {
+        setState(() => error = 'Apple ile giriş tamamlanamadı. Tekrar dene.');
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => error = 'Apple ile giriş tamamlanamadı. Tekrar dene.');
       }
     } finally {
       if (mounted) setState(() => loading = false);
@@ -274,9 +299,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       ),
                       const SizedBox(height: 10),
                       OutlinedButton.icon(
-                        onPressed: loading
-                            ? null
-                            : () => socialSignIn(OAuthProvider.apple),
+                        onPressed: loading ? null : appleSignIn,
                         icon: const Icon(Icons.apple),
                         label: const Text('Apple ile devam et'),
                       ),

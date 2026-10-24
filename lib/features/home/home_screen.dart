@@ -482,8 +482,24 @@ class _AsyncList<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) => value.when(
     loading: () => const Center(child: CircularProgressIndicator()),
-    error: (_, _) => const Center(
-      child: Text('Veriler yüklenemedi. İnternet bağlantını kontrol et.'),
+    error: (error, _) => RefreshIndicator(
+      onRefresh: onRefresh,
+      child: ListView(
+        children: [
+          SizedBox(height: MediaQuery.sizeOf(context).height * .25),
+          const Icon(Icons.sync_problem, size: 46),
+          const SizedBox(height: 12),
+          const Center(child: Text('Veriler şu anda yüklenemedi.')),
+          const SizedBox(height: 8),
+          Center(
+            child: TextButton.icon(
+              onPressed: onRefresh,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Yeniden dene'),
+            ),
+          ),
+        ],
+      ),
     ),
     data: (items) => RefreshIndicator(
       onRefresh: onRefresh,
