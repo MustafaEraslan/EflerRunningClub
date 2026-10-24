@@ -12,6 +12,7 @@ Flutter uygulaması feature-first yapıdadır. Riverpod veri yükleme ve yenilem
 - `efeler_runs`: koşu planı, durum ve kazanılacak puan.
 - `efeler_qr_tokens`: 60 saniye geçerli, tahmin edilemez QR token'ları.
 - `efeler_checkins`: koşu başına üye için tek katılım.
+- `efeler_reservations`: kapasite korumalı rezervasyon ve katılım durumu.
 - `efeler_points_ledger`: append-only puan hareketleri; bakiye `efeler_member_balance` görünümünde toplanır.
 - `efeler_rewards`: tekstil ürünleri, puan bedeli ve stok.
 - `efeler_reward_requests`: fiziksel teslimat talepleri.
@@ -25,6 +26,7 @@ Her tabloda sabit `app_id = 'efeler'` kontrolü vardır. Profil tetikleyicisi ya
 - `efeler_redeem`: ödül satırını kilitler; bakiye/stok kontrolü sonrası stok, puan ve talebi atomik günceller.
 - `efeler_set_run_status`: antrenör/yönetici koşuyu açar veya kapatır.
 - `efeler_create_run`: antrenör/yönetici gelecek tarihli koşu planlar.
+- `efeler_reserve_run`, `efeler_cancel_reservation`: satır kilidiyle kapasiteyi korur.
 - `efeler_ensure_profile`: Google/Apple ile ilk girişte KVKK onaylı Efeler profilini oluşturur.
 - `efeler_mark_delivered`, `efeler_cancel_request`, `efeler_adjust_points`: yönetici operasyonları.
 - `efeler_delete_account`: Efeler verilerini siler. Metadata Efeler'i tek uygulama olarak gösteriyorsa auth kaydını silmeyi dener; başka uygulama FK'sı varsa auth kaydını güvenle korur.

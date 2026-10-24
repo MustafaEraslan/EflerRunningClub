@@ -15,6 +15,7 @@ class _RunFormScreenState extends ConsumerState<RunFormScreen> {
   final title = TextEditingController();
   final location = TextEditingController();
   final points = TextEditingController(text: '10');
+  final capacity = TextEditingController(text: '30');
   DateTime startsAt = DateTime.now().add(const Duration(days: 1));
   bool saving = false;
   String? error;
@@ -24,6 +25,7 @@ class _RunFormScreenState extends ConsumerState<RunFormScreen> {
     title.dispose();
     location.dispose();
     points.dispose();
+    capacity.dispose();
     super.dispose();
   }
 
@@ -53,10 +55,13 @@ class _RunFormScreenState extends ConsumerState<RunFormScreen> {
 
   Future<void> save() async {
     final parsedPoints = int.tryParse(points.text);
+    final parsedCapacity = int.tryParse(capacity.text);
     if (title.text.trim().isEmpty ||
         location.text.trim().isEmpty ||
         parsedPoints == null ||
-        parsedPoints < 1) {
+        parsedPoints < 1 ||
+        parsedCapacity == null ||
+        parsedCapacity < 1) {
       setState(() => error = 'Tüm alanları geçerli bilgilerle doldur.');
       return;
     }
@@ -72,6 +77,7 @@ class _RunFormScreenState extends ConsumerState<RunFormScreen> {
             startsAt: startsAt,
             location: location.text,
             points: parsedPoints,
+            capacity: parsedCapacity,
           );
       ref.invalidate(runsProvider);
       if (mounted) Navigator.pop(context);
@@ -131,6 +137,15 @@ class _RunFormScreenState extends ConsumerState<RunFormScreen> {
           ),
         ),
         const SizedBox(height: 14),
+        TextField(
+          controller: capacity,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(
+            labelText: 'Kişi limiti',
+            suffixText: 'kişi',
+          ),
+        ),
+        const SizedBox(height: 20),
         if (error != null)
           Padding(
             padding: const EdgeInsets.only(bottom: 14),

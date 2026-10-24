@@ -5,7 +5,17 @@ String checkInMessage(String code) => switch (code) {
   'run_closed' => 'Bu koşu katılıma kapalı.',
   'invalid_token' => 'QR kod geçersiz.',
   'no_profile' => 'Efeler Running Club profilin bulunamadı.',
+  'not_reserved' => 'Bu koşuya rezervasyonun bulunmuyor.',
   _ => 'İşlem tamamlanamadı. Lütfen tekrar dene.',
+};
+
+String reservationMessage(String code) => switch (code) {
+  'success' => 'Koşudaki yerin ayrıldı. Görüşmek üzere!',
+  'already_reserved' => 'Bu koşuya zaten rezervasyon yaptın.',
+  'run_full' => 'Bu koşunun kontenjanı doldu.',
+  'run_closed' => 'Bu koşu rezervasyona kapalı.',
+  'cancelled' => 'Rezervasyonun iptal edildi.',
+  _ => 'Rezervasyon işlemi tamamlanamadı. Tekrar dene.',
 };
 
 String redeemMessage(String code) => switch (code) {

@@ -12,6 +12,7 @@ class EfelerApp extends StatelessWidget {
     debugShowCheckedModeBanner: false,
     theme: AppTheme.light,
     darkTheme: AppTheme.dark,
+    themeMode: ThemeMode.dark,
     routerConfig: appRouter,
   );
 }

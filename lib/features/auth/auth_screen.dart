@@ -135,134 +135,161 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       AuthMode.forgot => 'Şifreni yenile',
     };
     return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 440),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Image.asset('assets/icon/icon.png', height: 112),
-                  const SizedBox(height: 24),
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  if (widget.mode == AuthMode.register) ...[
-                    TextField(
-                      controller: fullName,
-                      textInputAction: TextInputAction.next,
-                      decoration: const InputDecoration(labelText: 'Ad soyad'),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(-.8, -1),
+            radius: 1.4,
+            colors: [Color(0xFF412039), Color(0xFF0D0D0F)],
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 440),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Image.asset('assets/icon/icon.png', height: 112),
+                    const SizedBox(height: 24),
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -1,
+                          ),
+                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 12),
-                  ],
-                  TextField(
-                    controller: email,
-                    keyboardType: TextInputType.emailAddress,
-                    textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(labelText: 'E-posta'),
-                  ),
-                  if (widget.mode != AuthMode.forgot) ...[
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: password,
-                      obscureText: true,
-                      decoration: const InputDecoration(labelText: 'Şifre'),
-                    ),
-                  ],
-                  if (widget.mode == AuthMode.register) ...[
-                    CheckboxListTile(
-                      contentPadding: EdgeInsets.zero,
-                      value: consent,
-                      onChanged: (value) =>
-                          setState(() => consent = value ?? false),
-                      title: const Text(
-                        'KVKK Aydınlatma Metni’ni okudum ve kabul ediyorum.',
-                      ),
-                      subtitle: const Text(
-                        'Metin bağlantısı yayın öncesi eklenecek.',
+                    const SizedBox(height: 6),
+                    Text(
+                      'Koş. Biriktir. Kazan.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: .65),
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ],
-                  if (error != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Text(
-                        error!,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
+                    const SizedBox(height: 26),
+                    if (widget.mode == AuthMode.register) ...[
+                      TextField(
+                        controller: fullName,
+                        textInputAction: TextInputAction.next,
+                        decoration: const InputDecoration(
+                          labelText: 'Ad soyad',
                         ),
                       ),
+                      const SizedBox(height: 12),
+                    ],
+                    TextField(
+                      controller: email,
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
+                      decoration: const InputDecoration(labelText: 'E-posta'),
                     ),
-                  FilledButton(
-                    onPressed: loading ? null : submit,
-                    child: Text(
-                      loading
-                          ? 'Lütfen bekle…'
-                          : widget.mode == AuthMode.login
-                          ? 'Giriş yap'
-                          : widget.mode == AuthMode.register
-                          ? 'Kayıt ol'
-                          : 'Bağlantı gönder',
-                    ),
-                  ),
-                  if (widget.mode == AuthMode.login) ...[
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      child: Row(
-                        children: [
-                          Expanded(child: Divider()),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 12),
-                            child: Text('veya'),
+                    if (widget.mode != AuthMode.forgot) ...[
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: password,
+                        obscureText: true,
+                        decoration: const InputDecoration(labelText: 'Şifre'),
+                      ),
+                    ],
+                    if (widget.mode == AuthMode.register) ...[
+                      CheckboxListTile(
+                        contentPadding: EdgeInsets.zero,
+                        value: consent,
+                        onChanged: (value) =>
+                            setState(() => consent = value ?? false),
+                        title: const Text(
+                          'KVKK Aydınlatma Metni’ni okudum ve kabul ediyorum.',
+                        ),
+                        subtitle: const Text(
+                          'Metin bağlantısı yayın öncesi eklenecek.',
+                        ),
+                      ),
+                    ],
+                    if (error != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Text(
+                          error!,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
                           ),
-                          Expanded(child: Divider()),
-                        ],
+                        ),
+                      ),
+                    FilledButton(
+                      onPressed: loading ? null : submit,
+                      child: Text(
+                        loading
+                            ? 'Lütfen bekle…'
+                            : widget.mode == AuthMode.login
+                            ? 'Giriş yap'
+                            : widget.mode == AuthMode.register
+                            ? 'Kayıt ol'
+                            : 'Bağlantı gönder',
                       ),
                     ),
-                    CheckboxListTile(
-                      contentPadding: EdgeInsets.zero,
-                      value: consent,
-                      onChanged: loading
-                          ? null
-                          : (value) => setState(() => consent = value ?? false),
-                      title: const Text(
-                        'KVKK Aydınlatma Metni’ni okudum ve kabul ediyorum.',
+                    if (widget.mode == AuthMode.login) ...[
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Row(
+                          children: [
+                            Expanded(child: Divider()),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 12),
+                              child: Text('veya'),
+                            ),
+                            Expanded(child: Divider()),
+                          ],
+                        ),
                       ),
-                    ),
-                    OutlinedButton.icon(
-                      onPressed: loading
-                          ? null
-                          : () => socialSignIn(OAuthProvider.google),
-                      icon: const Icon(Icons.g_mobiledata, size: 28),
-                      label: const Text('Google ile devam et'),
-                    ),
-                    const SizedBox(height: 10),
-                    OutlinedButton.icon(
-                      onPressed: loading
-                          ? null
-                          : () => socialSignIn(OAuthProvider.apple),
-                      icon: const Icon(Icons.apple),
-                      label: const Text('Apple ile devam et'),
-                    ),
-                    TextButton(
-                      onPressed: () => context.go('/forgot'),
-                      child: const Text('Şifremi unuttum'),
-                    ),
-                    TextButton(
-                      onPressed: () => context.go('/register'),
-                      child: const Text('Hesabın yok mu? Kayıt ol'),
-                    ),
-                  ] else
-                    TextButton(
-                      onPressed: () => context.go('/login'),
-                      child: const Text('Giriş ekranına dön'),
-                    ),
-                ],
+                      CheckboxListTile(
+                        contentPadding: EdgeInsets.zero,
+                        value: consent,
+                        onChanged: loading
+                            ? null
+                            : (value) =>
+                                  setState(() => consent = value ?? false),
+                        title: const Text(
+                          'KVKK Aydınlatma Metni’ni okudum ve kabul ediyorum.',
+                        ),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: loading
+                            ? null
+                            : () => socialSignIn(OAuthProvider.google),
+                        icon: const Icon(Icons.g_mobiledata, size: 28),
+                        label: const Text('Google ile devam et'),
+                      ),
+                      const SizedBox(height: 10),
+                      OutlinedButton.icon(
+                        onPressed: loading
+                            ? null
+                            : () => socialSignIn(OAuthProvider.apple),
+                        icon: const Icon(Icons.apple),
+                        label: const Text('Apple ile devam et'),
+                      ),
+                      TextButton(
+                        onPressed: () => context.go('/forgot'),
+                        child: const Text('Şifremi unuttum'),
+                      ),
+                      TextButton(
+                        onPressed: () => context.go('/register'),
+                        child: const Text('Hesabın yok mu? Kayıt ol'),
+                      ),
+                    ] else
+                      TextButton(
+                        onPressed: () => context.go('/login'),
+                        child: const Text('Giriş ekranına dön'),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),

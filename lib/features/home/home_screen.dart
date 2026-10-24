@@ -87,44 +87,146 @@ class RunsTab extends ConsumerWidget {
       value: ref.watch(runsProvider),
       empty: 'Henüz planlanmış koşu yok.',
       onRefresh: () => ref.refresh(runsProvider.future),
-      itemBuilder: (run) => Card(
-        child: ListTile(
-          contentPadding: const EdgeInsets.all(16),
-          leading: CircleAvatar(child: Text('${run.points}')),
-          title: Text(run.title),
-          subtitle: Text(
-            '${DateFormat('dd.MM.yyyy • HH:mm').format(run.startsAt)}\n${run.location}',
+      itemBuilder: (run) => Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF242126), Color(0xFF151517)],
           ),
-          isThreeLine: true,
-          trailing: profile?.canManageRuns == true
-              ? IconButton(
-                  tooltip: run.status == 'open'
-                      ? 'QR kodu göster'
-                      : 'Koşuyu aç',
-                  icon: Icon(
-                    run.status == 'open' ? Icons.qr_code_2 : Icons.lock_open,
+          border: Border.all(color: const Color(0xFF343036)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF5ABB),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      DateFormat('dd.MM • HH:mm').format(run.startsAt),
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
                   ),
-                  onPressed: () async {
-                    if (run.status != 'open') {
-                      await ref
-                          .read(repositoryProvider)
-                          .setRunStatus(run.id, 'open');
-                      ref.invalidate(runsProvider);
-                    }
-                    if (context.mounted) context.push('/qr/${run.id}');
-                  },
+                  const Spacer(),
+                  Chip(label: Text('${run.points} PUAN')),
+                ],
+              ),
+              const SizedBox(height: 18),
+              Text(
+                run.title,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -.5,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.location_on_outlined, size: 18),
+                  const SizedBox(width: 6),
+                  Expanded(child: Text(run.location)),
+                ],
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Text(
+                    '${run.reservedCount}/${run.capacity} kişi',
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  const Spacer(),
+                  Text(
+                    run.availableSpots > 0
+                        ? '${run.availableSpots} boş yer'
+                        : 'Kontenjan dolu',
+                    style: const TextStyle(color: Color(0xFFCCFF00)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              LinearProgressIndicator(
+                value: run.capacity == 0 ? 0 : run.reservedCount / run.capacity,
+                minHeight: 7,
+                borderRadius: BorderRadius.circular(8),
+                backgroundColor: const Color(0xFF343036),
+                color: const Color(0xFFCCFF00),
+              ),
+              const SizedBox(height: 18),
+              if (profile?.canManageRuns == true)
+                FilledButton.icon(
+                  icon: const Icon(Icons.qr_code_2),
+                  label: Text(
+                    run.status == 'open'
+                        ? 'QR KODU GÖSTER'
+                        : 'KOŞUYU AÇ & QR OLUŞTUR',
+                  ),
+                  onPressed: run.status == 'closed'
+                      ? null
+                      : () => _showQr(context, ref, run),
                 )
-              : Chip(label: Text(_status(run.status))),
+              else
+                FilledButton(
+                  onPressed:
+                      run.status == 'closed' ||
+                          (!run.isReserved && run.availableSpots <= 0)
+                      ? null
+                      : () => _toggleReservation(context, ref, run),
+                  style: run.isReserved
+                      ? FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFF343036),
+                          foregroundColor: Colors.white,
+                        )
+                      : null,
+                  child: Text(
+                    run.isReserved ? 'REZERVASYONU İPTAL ET' : 'YERİNİ AYIRT',
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  String _status(String value) => switch (value) {
-    'open' => 'Açık',
-    'closed' => 'Tamamlandı',
-    _ => 'Planlandı',
-  };
+  Future<void> _showQr(BuildContext context, WidgetRef ref, ClubRun run) async {
+    if (run.status != 'open') {
+      await ref.read(repositoryProvider).setRunStatus(run.id, 'open');
+      ref.invalidate(runsProvider);
+    }
+    if (context.mounted) context.push('/qr/${run.id}');
+  }
+
+  Future<void> _toggleReservation(
+    BuildContext context,
+    WidgetRef ref,
+    ClubRun run,
+  ) async {
+    final repo = ref.read(repositoryProvider);
+    final code = run.isReserved
+        ? await repo.cancelReservation(run.id)
+        : await repo.reserveRun(run.id);
+    ref.invalidate(runsProvider);
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(reservationMessage(code))));
+    }
+  }
 }
 
 class RewardsTab extends ConsumerWidget {

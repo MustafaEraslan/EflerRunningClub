@@ -18,16 +18,65 @@ abstract final class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
-      scaffoldBackgroundColor: brightness == Brightness.light
-          ? const Color(0xFFFFF9FC)
-          : null,
-      inputDecorationTheme: const InputDecorationTheme(
-        border: OutlineInputBorder(),
+      scaffoldBackgroundColor: brightness == Brightness.dark
+          ? const Color(0xFF0D0D0F)
+          : const Color(0xFFFFF9FC),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        centerTitle: false,
+        titleTextStyle: TextStyle(
+          color: scheme.onSurface,
+          fontSize: 26,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.7,
+        ),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: const Color(0xFF17171A),
+        indicatorColor: pink.withValues(alpha: .18),
+        labelTextStyle: WidgetStateProperty.all(
+          const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: brightness == Brightness.dark
+            ? const Color(0xFF1B1B1F)
+            : Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: scheme.outlineVariant),
+        ),
         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
-      cardTheme: const CardThemeData(margin: EdgeInsets.symmetric(vertical: 6)),
+      cardTheme: CardThemeData(
+        color: brightness == Brightness.dark
+            ? const Color(0xFF1B1B1F)
+            : Colors.white,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+        margin: const EdgeInsets.symmetric(vertical: 7),
+      ),
       filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+        style: FilledButton.styleFrom(
+          backgroundColor: pink,
+          foregroundColor: Colors.black,
+          minimumSize: const Size.fromHeight(54),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          textStyle: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: lime.withValues(alpha: .12),
+        side: BorderSide.none,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

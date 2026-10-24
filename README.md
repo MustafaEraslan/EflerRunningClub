@@ -15,7 +15,8 @@ Migration'ları Supabase SQL Editor'da dosya adı sırasıyla çalıştırın:
 
 1. `supabase/migrations/20261024180000_efeler_core.sql`
 2. `supabase/migrations/20261024190000_efeler_social_and_coach.sql`
-3. İsteğe bağlı, yalnızca geliştirme ortamında: `supabase/seed.sql`
+3. `supabase/migrations/20261024200000_efeler_run_reservations.sql`
+4. İsteğe bağlı, yalnızca geliştirme ortamında: `supabase/seed.sql`
 
 Migration tekrar çalıştırılabilir ve ortak projedeki mevcut nesneleri değiştirmez; oluşturduğu tüm tablo, görünüm, fonksiyon, politika ve tetikleyiciler `efeler_` öneklidir. İlk yönetici hesabını uygulamada kaydettikten sonra SQL Editor'da bir kez şu sorguyla yetkilendirin:
 

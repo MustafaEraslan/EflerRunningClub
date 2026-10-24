@@ -57,11 +57,7 @@ class ClubRepository {
   }
 
   Future<List<ClubRun>> getRuns() async {
-    final data = await client
-        .from('efeler_runs')
-        .select()
-        .eq('app_id', AppConfig.appId)
-        .order('starts_at');
+    final data = await client.rpc('efeler_list_runs');
     return data.map(ClubRun.fromJson).toList();
   }
 
@@ -143,6 +139,7 @@ class ClubRepository {
     required DateTime startsAt,
     required String location,
     required int points,
+    required int capacity,
   }) => client
       .rpc(
         'efeler_create_run',
@@ -151,9 +148,26 @@ class ClubRepository {
           'p_starts_at': startsAt.toUtc().toIso8601String(),
           'p_location': location.trim(),
           'p_points': points,
+          'p_capacity': capacity,
         },
       )
       .then((_) {});
+
+  Future<String> reserveRun(String runId) async {
+    final data = await client.rpc(
+      'efeler_reserve_run',
+      params: {'p_run_id': runId},
+    );
+    return _code(data);
+  }
+
+  Future<String> cancelReservation(String runId) async {
+    final data = await client.rpc(
+      'efeler_cancel_reservation',
+      params: {'p_run_id': runId},
+    );
+    return _code(data);
+  }
 
   Future<void> deleteAccount() =>
       client.rpc('efeler_delete_account').then((_) => client.auth.signOut());

@@ -19,6 +19,9 @@ class ClubRun {
     required this.location,
     required this.status,
     required this.points,
+    required this.capacity,
+    required this.reservedCount,
+    required this.isReserved,
   });
   final String id;
   final String title;
@@ -26,6 +29,10 @@ class ClubRun {
   final String location;
   final String status;
   final int points;
+  final int capacity;
+  final int reservedCount;
+  final bool isReserved;
+  int get availableSpots => capacity - reservedCount;
   factory ClubRun.fromJson(Map<String, dynamic> json) => ClubRun(
     id: json['id'] as String,
     title: json['title'] as String,
@@ -33,6 +40,9 @@ class ClubRun {
     location: json['location'] as String,
     status: json['status'] as String,
     points: json['points'] as int,
+    capacity: (json['capacity'] as num?)?.toInt() ?? 50,
+    reservedCount: (json['reserved_count'] as num?)?.toInt() ?? 0,
+    isReserved: json['is_reserved'] as bool? ?? false,
   );
 }
 
