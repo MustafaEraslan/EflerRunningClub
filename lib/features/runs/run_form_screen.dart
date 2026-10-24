@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/providers/providers.dart';
+import '../../core/widgets/compact_date_time_picker.dart';
 
 class RunFormScreen extends ConsumerStatefulWidget {
   const RunFormScreen({super.key});
@@ -30,14 +31,14 @@ class _RunFormScreenState extends ConsumerState<RunFormScreen> {
   }
 
   Future<void> pickDateTime() async {
-    final date = await showDatePicker(
+    final date = await showCompactDatePicker(
       context: context,
       initialDate: startsAt,
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 730)),
     );
     if (date == null || !mounted) return;
-    final time = await showTimePicker(
+    final time = await showCompactTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(startsAt),
     );
