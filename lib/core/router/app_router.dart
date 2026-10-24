@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../features/auth/auth_screen.dart';
 import '../../features/auth/reset_password_screen.dart';
 import '../../features/home/home_screen.dart';
+import '../../features/profile/edit_profile_screen.dart';
 import '../../features/profile/profile_screen.dart';
 import '../../features/profile/team_screen.dart';
 import '../../features/rewards/reward_form_screen.dart';
@@ -49,6 +50,7 @@ final appRouter = GoRouter(
       builder: (_, state) => QrScreen(runId: state.pathParameters['runId']!),
     ),
     GoRoute(path: '/profile', builder: (_, _) => const ProfileScreen()),
+    GoRoute(path: '/profile/edit', builder: (_, _) => const EditProfileScreen()),
     GoRoute(path: '/team', builder: (_, _) => const TeamScreen()),
     GoRoute(path: '/rewards/new', builder: (_, _) => const RewardFormScreen()),
   ],
