@@ -41,13 +41,7 @@ class ProfileScreen extends ConsumerWidget {
                       p.fullName,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    Text(
-                      p.role == 'admin'
-                          ? 'Yönetici'
-                          : p.role == 'coach'
-                          ? 'Antrenör'
-                          : 'Atlet',
-                    ),
+                    Text(p.levelLabel),
                   ],
                 ),
               ),
@@ -63,7 +57,7 @@ class ProfileScreen extends ConsumerWidget {
                   color: Color(0xFFCCFF00),
                 ),
                 title: const Text('Kulüp yetkilerini yönet'),
-                subtitle: const Text('Atletleri antrenör olarak yetkilendir'),
+                subtitle: const Text('Atlet ve antrenör seviyelerini yönet'),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.push('/team'),
               ),

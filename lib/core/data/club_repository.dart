@@ -142,6 +142,20 @@ class ClubRepository {
       .rpc('efeler_promote_to_coach', params: {'p_member_id': memberId})
       .then((_) {});
 
+  Future<void> setCoachLevel(String coachId, int level) => client
+      .rpc(
+        'efeler_set_coach_level',
+        params: {'p_coach_id': coachId, 'p_level': level},
+      )
+      .then((_) {});
+
+  Future<void> changeRunnerLevel(String memberId, int direction) => client
+      .rpc(
+        'efeler_change_runner_level',
+        params: {'p_member_id': memberId, 'p_direction': direction},
+      )
+      .then((_) {});
+
   Future<List<ClubRun>> getRuns() async {
     final data = await client.rpc('efeler_list_runs');
     final rows = List<Map<String, dynamic>>.from(data as List);

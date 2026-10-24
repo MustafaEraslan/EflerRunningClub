@@ -5,19 +5,28 @@ class Profile {
     required this.role,
     required this.bio,
     required this.avatarPath,
+    required this.coachLevel,
+    required this.runnerLevel,
   });
   final String id;
   final String fullName;
   final String role;
   final String bio;
   final String? avatarPath;
+  final int coachLevel;
+  final int runnerLevel;
   bool get canManageRuns => role == 'coach' || role == 'admin';
+  bool get canManageCoaches =>
+      role == 'admin' || (role == 'coach' && coachLevel == 3);
+  String get levelLabel => memberLevelLabel(role, coachLevel, runnerLevel);
   factory Profile.fromJson(Map<String, dynamic> json) => Profile(
     id: json['id'] as String,
     fullName: json['full_name'] as String? ?? '',
     role: json['role'] as String? ?? 'member',
     bio: json['bio'] as String? ?? '',
     avatarPath: json['avatar_path'] as String?,
+    coachLevel: (json['coach_level'] as num?)?.toInt() ?? 0,
+    runnerLevel: (json['runner_level'] as num?)?.toInt() ?? 1,
   );
 }
 
@@ -28,19 +37,43 @@ class ClubMember {
     required this.role,
     required this.bio,
     required this.avatarPath,
+    required this.coachLevel,
+    required this.runnerLevel,
   });
   final String id;
   final String fullName;
   final String role;
   final String bio;
   final String? avatarPath;
+  final int coachLevel;
+  final int runnerLevel;
+  String get levelLabel => memberLevelLabel(role, coachLevel, runnerLevel);
   factory ClubMember.fromJson(Map<String, dynamic> json) => ClubMember(
     id: json['id'] as String,
     fullName: json['full_name'] as String? ?? '',
     role: json['role'] as String? ?? 'member',
     bio: json['bio'] as String? ?? '',
     avatarPath: json['avatar_path'] as String?,
+    coachLevel: (json['coach_level'] as num?)?.toInt() ?? 0,
+    runnerLevel: (json['runner_level'] as num?)?.toInt() ?? 1,
   );
+}
+
+String memberLevelLabel(String role, int coachLevel, int runnerLevel) {
+  if (role == 'admin') return 'Yönetici';
+  if (role == 'coach') {
+    return switch (coachLevel) {
+      3 => 'Baş Antrenör',
+      2 => 'Kıdemli Antrenör',
+      _ => 'Yardımcı Antrenör',
+    };
+  }
+  return switch (runnerLevel) {
+    4 => 'Elit',
+    3 => 'Tempocu',
+    2 => 'Koşucu',
+    _ => 'Çaylak',
+  };
 }
 
 class ClubRun {
