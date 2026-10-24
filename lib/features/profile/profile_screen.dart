@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../core/providers/providers.dart';
+import '../../core/widgets/confirm_dialog.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -182,26 +183,14 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   Future<void> _delete(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Hesabı sil'),
-        content: const Text(
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Hesabı sil',
+      message:
           'Bu işlem geri alınamaz. Katılım, puan ve ödül talebi geçmişin silinecek.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Vazgeç'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Hesabımı sil'),
-          ),
-        ],
-      ),
+      confirmLabel: 'Hesabımı sil',
     );
-    if (confirmed != true) return;
+    if (!confirmed) return;
     try {
       await ref.read(repositoryProvider).deleteAccount();
       if (context.mounted) context.go('/login');

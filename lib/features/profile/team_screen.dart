@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/models.dart';
 import '../../core/providers/providers.dart';
+import '../../core/widgets/confirm_dialog.dart';
 
 class TeamScreen extends ConsumerWidget {
   const TeamScreen({super.key});
@@ -237,26 +238,14 @@ class _RunnerActions extends ConsumerWidget {
   }
 
   Future<void> _promote(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Antrenör yetkisi ver'),
-        content: Text(
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Antrenör yetkisi ver',
+      message:
           '${member.fullName}, Yardımcı Antrenör olacak; koşu planlayıp katılım QR kodu oluşturabilecek.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Vazgeç'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Yetki ver'),
-          ),
-        ],
-      ),
+      confirmLabel: 'Yetki ver',
     );
-    if (confirmed != true) return;
+    if (!confirmed) return;
     try {
       await ref.read(repositoryProvider).promoteToCoach(member.id);
       ref.invalidate(membersProvider);

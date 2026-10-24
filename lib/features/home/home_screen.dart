@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../core/errors/result_messages.dart';
 import '../../core/models/models.dart';
 import '../../core/providers/providers.dart';
+import '../../core/widgets/confirm_dialog.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -378,26 +379,13 @@ class RewardsTab extends ConsumerWidget {
     WidgetRef ref,
     Reward reward,
   ) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Ödülü talep et'),
-        content: Text(
-          '${reward.name} için ${reward.pointsCost} puan kullanılsın mı?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Vazgeç'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Onayla'),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Ödülü talep et',
+      message: '${reward.name} için ${reward.pointsCost} puan kullanılsın mı?',
+      confirmLabel: 'Onayla',
     );
-    if (confirmed != true) return;
+    if (!confirmed) return;
     final code = await ref.read(repositoryProvider).redeem(reward.id);
     ref.invalidate(balanceProvider);
     ref.invalidate(rewardsProvider);
