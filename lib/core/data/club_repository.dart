@@ -30,8 +30,15 @@ class ClubRepository {
       )
       .then((_) {});
 
-  Future<void> resetPassword(String email) =>
-      client.auth.resetPasswordForEmail(email.trim()).then((_) {});
+  Future<void> resetPassword(String email) => client.auth
+      .resetPasswordForEmail(
+        email.trim(),
+        redirectTo: 'com.efelerrunningclub.app://reset-password',
+      )
+      .then((_) {});
+
+  Future<void> updatePassword(String password) =>
+      client.auth.updateUser(UserAttributes(password: password)).then((_) {});
 
   Future<void> signOut() => client.auth.signOut();
 
@@ -55,6 +62,22 @@ class ClubRepository {
         .single();
     return Profile.fromJson(data);
   }
+
+  Future<void> updateProfile(String fullName, String bio) => client
+      .rpc(
+        'efeler_update_profile',
+        params: {'p_full_name': fullName.trim(), 'p_bio': bio.trim()},
+      )
+      .then((_) {});
+
+  Future<List<ClubMember>> getMembers() async {
+    final data = await client.rpc('efeler_list_members');
+    return data.map(ClubMember.fromJson).toList();
+  }
+
+  Future<void> promoteToCoach(String memberId) => client
+      .rpc('efeler_promote_to_coach', params: {'p_member_id': memberId})
+      .then((_) {});
 
   Future<List<ClubRun>> getRuns() async {
     final data = await client.rpc('efeler_list_runs');

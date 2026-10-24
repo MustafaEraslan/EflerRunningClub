@@ -32,7 +32,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((
       state,
     ) async {
-      if (state.event != AuthChangeEvent.signedIn || !mounted) return;
+      if (!mounted) return;
+      if (state.event == AuthChangeEvent.passwordRecovery) {
+        context.go('/reset-password');
+        return;
+      }
+      if (state.event != AuthChangeEvent.signedIn) return;
       try {
         await ref.read(repositoryProvider).ensureSocialProfile();
         ref.invalidate(profileProvider);

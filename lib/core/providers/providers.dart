@@ -13,6 +13,9 @@ final profileProvider = FutureProvider<Profile>(
 final runsProvider = FutureProvider<List<ClubRun>>(
   (ref) => ref.watch(repositoryProvider).getRuns(),
 );
+final membersProvider = FutureProvider<List<ClubMember>>(
+  (ref) => ref.watch(repositoryProvider).getMembers(),
+);
 final rewardsProvider = FutureProvider<List<Reward>>(
   (ref) => ref.watch(repositoryProvider).getRewards(),
 );

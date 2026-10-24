@@ -47,9 +47,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: pages[index],
       floatingActionButton: index == 0
           ? FloatingActionButton.extended(
-              onPressed: () => context.push('/scanner'),
-              icon: const Icon(Icons.qr_code_scanner),
-              label: const Text('QR Tara'),
+              onPressed: () =>
+                  context.push(canManageRuns ? '/runs/new' : '/scanner'),
+              icon: Icon(
+                canManageRuns ? Icons.add_road : Icons.qr_code_scanner,
+              ),
+              label: Text(canManageRuns ? 'KOŞU PLANLA' : 'QR TARA'),
             )
           : null,
       bottomNavigationBar: NavigationBar(
@@ -126,6 +129,47 @@ class RunsTab extends ConsumerWidget {
                   Chip(label: Text('${run.points} PUAN')),
                 ],
               ),
+              const SizedBox(height: 10),
+              InkWell(
+                borderRadius: BorderRadius.circular(14),
+                onTap: () => _showCoach(context, run),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Row(
+                    children: [
+                      const CircleAvatar(
+                        radius: 17,
+                        backgroundColor: Color(0xFFCCFF00),
+                        foregroundColor: Colors.black,
+                        child: Icon(Icons.sports, size: 18),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'KOŞUYU PLANLAYAN',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFFCCFF00),
+                              ),
+                            ),
+                            Text(
+                              run.coachName,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.chevron_right),
+                    ],
+                  ),
+                ),
+              ),
               const SizedBox(height: 18),
               Text(
                 run.title,
@@ -198,6 +242,38 @@ class RunsTab extends ConsumerWidget {
                 ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showCoach(BuildContext context, ClubRun run) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircleAvatar(radius: 34, child: Icon(Icons.sports, size: 34)),
+            const SizedBox(height: 12),
+            Text(run.coachName, style: Theme.of(context).textTheme.titleLarge),
+            const Text(
+              'Antrenör',
+              style: TextStyle(
+                color: Color(0xFFCCFF00),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              run.coachBio.isEmpty
+                  ? 'Antrenör henüz kısa bir tanıtım eklemedi.'
+                  : run.coachBio,
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );

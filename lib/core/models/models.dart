@@ -1,13 +1,39 @@
 class Profile {
-  const Profile({required this.id, required this.fullName, required this.role});
+  const Profile({
+    required this.id,
+    required this.fullName,
+    required this.role,
+    required this.bio,
+  });
   final String id;
   final String fullName;
   final String role;
+  final String bio;
   bool get canManageRuns => role == 'coach' || role == 'admin';
   factory Profile.fromJson(Map<String, dynamic> json) => Profile(
     id: json['id'] as String,
     fullName: json['full_name'] as String? ?? '',
     role: json['role'] as String? ?? 'member',
+    bio: json['bio'] as String? ?? '',
+  );
+}
+
+class ClubMember {
+  const ClubMember({
+    required this.id,
+    required this.fullName,
+    required this.role,
+    required this.bio,
+  });
+  final String id;
+  final String fullName;
+  final String role;
+  final String bio;
+  factory ClubMember.fromJson(Map<String, dynamic> json) => ClubMember(
+    id: json['id'] as String,
+    fullName: json['full_name'] as String? ?? '',
+    role: json['role'] as String? ?? 'member',
+    bio: json['bio'] as String? ?? '',
   );
 }
 
@@ -22,6 +48,8 @@ class ClubRun {
     required this.capacity,
     required this.reservedCount,
     required this.isReserved,
+    required this.coachName,
+    required this.coachBio,
   });
   final String id;
   final String title;
@@ -32,6 +60,8 @@ class ClubRun {
   final int capacity;
   final int reservedCount;
   final bool isReserved;
+  final String coachName;
+  final String coachBio;
   int get availableSpots => capacity - reservedCount;
   factory ClubRun.fromJson(Map<String, dynamic> json) => ClubRun(
     id: json['id'] as String,
@@ -43,6 +73,8 @@ class ClubRun {
     capacity: (json['capacity'] as num?)?.toInt() ?? 50,
     reservedCount: (json['reserved_count'] as num?)?.toInt() ?? 0,
     isReserved: json['is_reserved'] as bool? ?? false,
+    coachName: json['coach_name'] as String? ?? 'Antrenör',
+    coachBio: json['coach_bio'] as String? ?? '',
   );
 }
 

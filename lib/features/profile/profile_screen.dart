@@ -43,6 +43,30 @@ class ProfileScreen extends ConsumerWidget {
               ),
             ),
           ),
+          if (profile.asData?.value.canManageRuns == true) ...[
+            const SizedBox(height: 8),
+            Card(
+              color: const Color(0xFF292329),
+              child: ListTile(
+                leading: const Icon(
+                  Icons.admin_panel_settings,
+                  color: Color(0xFFCCFF00),
+                ),
+                title: const Text('Kulüp yetkilerini yönet'),
+                subtitle: const Text('Atletleri antrenör olarak yetkilendir'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push('/team'),
+              ),
+            ),
+          ],
+          ListTile(
+            leading: const Icon(Icons.edit_outlined),
+            title: const Text('Profilimi düzenle'),
+            subtitle: const Text('Adını ve kısa antrenör bilgini güncelle'),
+            onTap: profile.asData == null
+                ? null
+                : () => _edit(context, ref, profile.asData!.value),
+          ),
           ListTile(
             leading: const Icon(Icons.logout),
             title: const Text('Çıkış yap'),
@@ -67,6 +91,56 @@ class ProfileScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _edit(
+    BuildContext context,
+    WidgetRef ref,
+    dynamic profile,
+  ) async {
+    final name = TextEditingController(text: profile.fullName as String);
+    final bio = TextEditingController(text: profile.bio as String);
+    final save = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Profili düzenle'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: name,
+              decoration: const InputDecoration(labelText: 'Ad soyad'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: bio,
+              maxLength: 280,
+              maxLines: 4,
+              decoration: const InputDecoration(
+                labelText: 'Kısa bilgi',
+                hintText: 'Koşu deneyimin, uzmanlığın…',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Vazgeç'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Kaydet'),
+          ),
+        ],
+      ),
+    );
+    if (save == true && name.text.trim().isNotEmpty) {
+      await ref.read(repositoryProvider).updateProfile(name.text, bio.text);
+      ref.invalidate(profileProvider);
+    }
+    name.dispose();
+    bio.dispose();
   }
 
   Future<void> _delete(BuildContext context, WidgetRef ref) async {
