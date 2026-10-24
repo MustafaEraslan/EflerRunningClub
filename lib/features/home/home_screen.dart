@@ -352,21 +352,66 @@ class RewardsTab extends ConsumerWidget {
               fit: BoxFit.cover,
               errorBuilder: (_, _, _) => const SizedBox.shrink(),
             ),
-          ListTile(
-            contentPadding: const EdgeInsets.all(16),
-            leading: reward.imagePath == null
-                ? const CircleAvatar(child: Icon(Icons.checkroom))
-                : null,
-            title: Text(reward.name),
-            subtitle: Text(
-              '${reward.description}\n${reward.stock > 0 ? '${reward.stock} adet kaldı' : 'Stokta yok'}',
-            ),
-            isThreeLine: true,
-            trailing: FilledButton.tonal(
-              onPressed: reward.stock < 1
-                  ? null
-                  : () => _redeem(context, ref, reward),
-              child: Text('${reward.pointsCost} puan'),
+          // Explicit layout instead of ListTile: the theme's FilledButton has
+          // an infinite minimum width, which squeezed ListTile's title to ~0.
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (reward.imagePath == null) ...[
+                      const CircleAvatar(child: Icon(Icons.checkroom)),
+                      const SizedBox(width: 12),
+                    ],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            reward.name,
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w800),
+                          ),
+                          if (reward.description.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              reward.description,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        reward.stock > 0
+                            ? '${reward.stock} adet kaldı'
+                            : 'Stokta yok',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    FilledButton.tonal(
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(64, 40),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                      ),
+                      onPressed: reward.stock < 1
+                          ? null
+                          : () => _redeem(context, ref, reward),
+                      child: Text('${reward.pointsCost} puan'),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],
