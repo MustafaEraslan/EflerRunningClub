@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/config/app_config.dart';
 import '../../core/providers/providers.dart';
 
 enum AuthMode { login, register, forgot }
@@ -291,17 +292,27 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                         ),
                       ),
                       OutlinedButton.icon(
-                        onPressed: loading
+                        onPressed: loading || !AppConfig.googleSignInEnabled
                             ? null
                             : () => socialSignIn(OAuthProvider.google),
                         icon: const Icon(Icons.g_mobiledata, size: 28),
-                        label: const Text('Google ile devam et'),
+                        label: Text(
+                          AppConfig.googleSignInEnabled
+                              ? 'Google ile devam et'
+                              : 'Google ile devam et (kurulum gerekli)',
+                        ),
                       ),
                       const SizedBox(height: 10),
                       OutlinedButton.icon(
-                        onPressed: loading ? null : appleSignIn,
+                        onPressed: loading || !AppConfig.appleSignInEnabled
+                            ? null
+                            : appleSignIn,
                         icon: const Icon(Icons.apple),
-                        label: const Text('Apple ile devam et'),
+                        label: Text(
+                          AppConfig.appleSignInEnabled
+                              ? 'Apple ile devam et'
+                              : 'Apple ile devam et (üyelik gerekli)',
+                        ),
                       ),
                       TextButton(
                         onPressed: () => context.go('/forgot'),

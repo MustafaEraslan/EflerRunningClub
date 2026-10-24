@@ -2,6 +2,12 @@ class AppConfig {
   const AppConfig({required this.supabaseUrl, required this.anonKey});
 
   static const appId = 'efeler';
+  static const appleSignInEnabled = bool.fromEnvironment(
+    'APPLE_SIGN_IN_ENABLED',
+  );
+  static const googleSignInEnabled = bool.fromEnvironment(
+    'GOOGLE_SIGN_IN_ENABLED',
+  );
   final String supabaseUrl;
   final String anonKey;
 
