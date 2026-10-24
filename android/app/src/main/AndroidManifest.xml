@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.CAMERA" />
+    <!-- For image_picker on Android 13+ (API 33): -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <application
         android:label="Efeler Running Club"
         android:name="${applicationName}"

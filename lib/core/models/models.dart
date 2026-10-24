@@ -7,18 +7,32 @@ class Profile {
     required this.avatarPath,
     required this.coachLevel,
     required this.runnerLevel,
+    this.avatarUrl,
   });
   final String id;
   final String fullName;
   final String role;
   final String bio;
+  /// Storage path stored in the DB (may be null).
   final String? avatarPath;
+  /// Resolved display URL (public URL or signed URL). Populated by ClubRepository.
+  final String? avatarUrl;
   final int coachLevel;
   final int runnerLevel;
   bool get canManageRuns => role == 'coach' || role == 'admin';
   bool get canManageCoaches =>
       role == 'admin' || (role == 'coach' && coachLevel == 3);
   String get levelLabel => memberLevelLabel(role, coachLevel, runnerLevel);
+  Profile copyWith({String? avatarUrl}) => Profile(
+    id: id,
+    fullName: fullName,
+    role: role,
+    bio: bio,
+    avatarPath: avatarPath,
+    coachLevel: coachLevel,
+    runnerLevel: runnerLevel,
+    avatarUrl: avatarUrl ?? this.avatarUrl,
+  );
   factory Profile.fromJson(Map<String, dynamic> json) => Profile(
     id: json['id'] as String,
     fullName: json['full_name'] as String? ?? '',
@@ -39,12 +53,14 @@ class ClubMember {
     required this.avatarPath,
     required this.coachLevel,
     required this.runnerLevel,
+    this.avatarUrl,
   });
   final String id;
   final String fullName;
   final String role;
   final String bio;
   final String? avatarPath;
+  final String? avatarUrl;
   final int coachLevel;
   final int runnerLevel;
   String get levelLabel => memberLevelLabel(role, coachLevel, runnerLevel);
@@ -56,6 +72,16 @@ class ClubMember {
     avatarPath: json['avatar_path'] as String?,
     coachLevel: (json['coach_level'] as num?)?.toInt() ?? 0,
     runnerLevel: (json['runner_level'] as num?)?.toInt() ?? 1,
+  );
+  ClubMember withAvatarUrl(String? url) => ClubMember(
+    id: id,
+    fullName: fullName,
+    role: role,
+    bio: bio,
+    avatarPath: avatarPath,
+    coachLevel: coachLevel,
+    runnerLevel: runnerLevel,
+    avatarUrl: url,
   );
 }
 
@@ -90,6 +116,7 @@ class ClubRun {
     required this.coachName,
     required this.coachBio,
     required this.coachAvatarPath,
+    this.coachAvatarUrl,
   });
   final String id;
   final String title;
@@ -103,7 +130,23 @@ class ClubRun {
   final String coachName;
   final String coachBio;
   final String? coachAvatarPath;
+  final String? coachAvatarUrl;
   int get availableSpots => capacity - reservedCount;
+  ClubRun withCoachAvatarUrl(String? url) => ClubRun(
+    id: id,
+    title: title,
+    startsAt: startsAt,
+    location: location,
+    status: status,
+    points: points,
+    capacity: capacity,
+    reservedCount: reservedCount,
+    isReserved: isReserved,
+    coachName: coachName,
+    coachBio: coachBio,
+    coachAvatarPath: coachAvatarPath,
+    coachAvatarUrl: url,
+  );
   factory ClubRun.fromJson(Map<String, dynamic> json) => ClubRun(
     id: json['id'] as String,
     title: json['title'] as String,

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/models.dart';
 import '../../core/providers/providers.dart';
+import '../../core/widgets/avatar_widget.dart';
 import '../../core/widgets/confirm_dialog.dart';
 
 class TeamScreen extends ConsumerWidget {
@@ -93,7 +94,6 @@ class _MemberCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final repository = ref.read(repositoryProvider);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -103,18 +103,12 @@ class _MemberCard extends ConsumerWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                CircleAvatar(
+                AvatarWidget(
                   radius: 25,
-                  backgroundImage: member.avatarPath == null
-                      ? null
-                      : NetworkImage(repository.mediaUrl(member.avatarPath!)),
-                  child: member.avatarPath == null
-                      ? Text(
-                          member.fullName.isEmpty
-                              ? '?'
-                              : member.fullName[0].toUpperCase(),
-                        )
-                      : null,
+                  url: member.avatarUrl,
+                  initials: member.fullName.isNotEmpty
+                      ? member.fullName[0].toUpperCase()
+                      : '?',
                 ),
                 const SizedBox(width: 14),
                 Expanded(

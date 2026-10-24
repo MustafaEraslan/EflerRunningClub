@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../core/errors/result_messages.dart';
 import '../../core/models/models.dart';
 import '../../core/providers/providers.dart';
+import '../../core/widgets/avatar_widget.dart';
 import '../../core/widgets/confirm_dialog.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -144,20 +145,13 @@ class RunsTab extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(vertical: 6),
                   child: Row(
                     children: [
-                      CircleAvatar(
+                      AvatarWidget(
                         radius: 17,
-                        backgroundColor: Color(0xFFCCFF00),
-                        foregroundColor: Colors.black,
-                        backgroundImage: run.coachAvatarPath == null
-                            ? null
-                            : NetworkImage(
-                                ref
-                                    .read(repositoryProvider)
-                                    .mediaUrl(run.coachAvatarPath!),
-                              ),
-                        child: run.coachAvatarPath == null
-                            ? const Icon(Icons.sports, size: 18)
+                        url: run.coachAvatarUrl,
+                        initials: run.coachName.isNotEmpty
+                            ? run.coachName[0].toUpperCase()
                             : null,
+                        fallbackIcon: Icons.sports,
                       ),
                       const SizedBox(width: 10),
                       Expanded(
@@ -272,18 +266,13 @@ class RunsTab extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircleAvatar(
+            AvatarWidget(
               radius: 34,
-              backgroundImage: run.coachAvatarPath == null
-                  ? null
-                  : NetworkImage(
-                      ref
-                          .read(repositoryProvider)
-                          .mediaUrl(run.coachAvatarPath!),
-                    ),
-              child: run.coachAvatarPath == null
-                  ? const Icon(Icons.sports, size: 34)
+              url: run.coachAvatarUrl,
+              initials: run.coachName.isNotEmpty
+                  ? run.coachName[0].toUpperCase()
                   : null,
+              fallbackIcon: Icons.sports,
             ),
             const SizedBox(height: 12),
             Text(run.coachName, style: Theme.of(context).textTheme.titleLarge),

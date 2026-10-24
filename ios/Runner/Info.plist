@@ -20,7 +20,7 @@
 		</dict>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>Koşu katılım QR kodunu taramak için kamera erişimi gerekir.</string>
+	<string>Koşu katılım QR kodunu taramak ve profil fotoğrafı çekmek için kamera erişimi gerekir.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Profil ve ödül görseli seçmek için fotoğraf arşivine erişim gerekir.</string>
 	<key>CFBundleExecutable</key>

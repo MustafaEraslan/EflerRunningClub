@@ -95,7 +95,9 @@ class ClubRepository {
         .eq('app_id', AppConfig.appId)
         .eq('id', user!.id)
         .single();
-    return Profile.fromJson(data);
+    final profile = Profile.fromJson(data);
+    final url = await resolveAvatarUrl(profile.avatarPath);
+    return profile.copyWith(avatarUrl: url);
   }
 
   Future<void> updateProfile(String fullName, String bio) => client
@@ -105,20 +107,43 @@ class ClubRepository {
       )
       .then((_) {});
 
+  /// Public URL for objects in the public efeler-media bucket (reward images, etc.)
   String mediaUrl(String path) =>
       client.storage.from('efeler-media').getPublicUrl(path);
 
+  /// Resolves an avatar storage path to a displayable URL.
+  ///
+  /// Legacy paths (avatars/{id}.jpg) live in the public efeler-media bucket.
+  /// New paths ({id}/avatar.jpg) live in the private efeler-avatars bucket and
+  /// require a signed URL (1-week expiry; refreshed on every profile/member/run fetch).
+  Future<String?> resolveAvatarUrl(String? path) async {
+    if (path == null) return null;
+    if (path.startsWith('avatars/')) {
+      // Legacy: public bucket – return synchronously.
+      return client.storage.from('efeler-media').getPublicUrl(path);
+    }
+    try {
+      return await client.storage
+          .from('efeler-avatars')
+          .createSignedUrl(path, 604800); // 1 week
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Upload the user's avatar to efeler-avatars, then update their profile path.
+  /// [bytes] should be a JPEG, ≤512×512 px, ~80 % quality.
   Future<void> uploadProfileAvatar(Uint8List bytes) async {
-    final path = 'avatars/${user!.id}.jpg';
+    final path = '${user!.id}/avatar.jpg';
     await client.storage
-        .from('efeler-media')
+        .from('efeler-avatars')
         .uploadBinary(
           path,
           bytes,
           fileOptions: const FileOptions(
             contentType: 'image/jpeg',
             upsert: true,
-            cacheControl: '3600',
+            cacheControl: '1',  // 1 second – forces re-fetch after re-upload
           ),
         );
     final profile = await getProfile();
@@ -135,7 +160,11 @@ class ClubRepository {
   Future<List<ClubMember>> getMembers() async {
     final data = await client.rpc('efeler_list_members');
     final rows = List<Map<String, dynamic>>.from(data as List);
-    return rows.map(ClubMember.fromJson).toList(growable: false);
+    final members = rows.map(ClubMember.fromJson).toList(growable: false);
+    final urls = await Future.wait(
+      members.map((m) => resolveAvatarUrl(m.avatarPath)),
+    );
+    return [for (var i = 0; i < members.length; i++) members[i].withAvatarUrl(urls[i])];
   }
 
   Future<void> promoteToCoach(String memberId) => client
@@ -159,7 +188,11 @@ class ClubRepository {
   Future<List<ClubRun>> getRuns() async {
     final data = await client.rpc('efeler_list_runs');
     final rows = List<Map<String, dynamic>>.from(data as List);
-    return rows.map(ClubRun.fromJson).toList(growable: false);
+    final runs = rows.map(ClubRun.fromJson).toList(growable: false);
+    final urls = await Future.wait(
+      runs.map((r) => resolveAvatarUrl(r.coachAvatarPath)),
+    );
+    return [for (var i = 0; i < runs.length; i++) runs[i].withCoachAvatarUrl(urls[i])];
   }
 
   Future<List<Reward>> getRewards() async {
