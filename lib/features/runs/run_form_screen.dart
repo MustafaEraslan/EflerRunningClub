@@ -97,6 +97,18 @@ class _RunFormScreenState extends ConsumerState<RunFormScreen> {
           points: parsedPoints,
           capacity: parsedCapacity,
         );
+        // Notify users who reserved this run.
+        final reservedUsers =
+            await repo.getRunReservedUserIds(widget.run!.id);
+        if (reservedUsers.isNotEmpty) {
+          repo.sendNotification(
+            type: 'run_updated',
+            refId: widget.run!.id,
+            targetUserIds: reservedUsers,
+            title: 'Koşu güncellendi',
+            body: '${title.text} koşusu güncellendi. Detayları kontrol et.',
+          );
+        }
       } else {
         await repo.createRun(
           title: title.text,
@@ -104,6 +116,12 @@ class _RunFormScreenState extends ConsumerState<RunFormScreen> {
           location: location.text,
           points: parsedPoints,
           capacity: parsedCapacity,
+        );
+        // Notify all users about the new run.
+        repo.sendNotification(
+          type: 'new_run',
+          title: 'Yeni koşu planlandı!',
+          body: '${title.text} — katılmak için hemen yerini ayırt.',
         );
       }
       ref.invalidate(runsProvider);

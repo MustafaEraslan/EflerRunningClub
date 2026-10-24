@@ -123,6 +123,13 @@ class _RewardFormScreenState extends ConsumerState<RewardFormScreen> {
             imageFailed = true;
           }
         }
+        // Notify all users about the new reward.
+        repo.sendNotification(
+          type: 'new_reward',
+          refId: rewardId,
+          title: 'Yeni ödül eklendi!',
+          body: '${name.text} — puanlarını kullanarak hemen talep et.',
+        );
         ref.invalidate(rewardsProvider);
         if (mounted) {
           final messenger = ScaffoldMessenger.of(context);

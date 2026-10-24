@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../core/errors/result_messages.dart';
 import '../../core/models/models.dart';
 import '../../core/providers/providers.dart';
+import '../../core/services/notification_service.dart';
 import '../../core/widgets/avatar_widget.dart';
 import '../../core/widgets/confirm_dialog.dart';
 
@@ -17,6 +18,15 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize push notifications after the first frame.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      NotificationService.instance.init(context);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

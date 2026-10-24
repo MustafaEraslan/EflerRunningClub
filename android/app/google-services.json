@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1028964662835",
+    "project_id": "efeler-running-club",
+    "storage_bucket": "efeler-running-club.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1028964662835:android:e3a7e8621a1c139604ad46",
+        "android_client_info": {
+          "package_name": "com.efelerrunningclub.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA0d6rW2vyE2jesmFfIywGawIwAM984cEM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

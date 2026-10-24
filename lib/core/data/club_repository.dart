@@ -388,6 +388,44 @@ class ClubRepository {
   Future<void> deleteAccount() =>
       client.rpc('efeler_delete_account').then((_) => client.auth.signOut());
 
+  /// Queue a push notification and invoke the edge function to deliver it.
+  /// Best-effort: failures are silently ignored so the main action is not blocked.
+  Future<void> sendNotification({
+    required String type,
+    String? refId,
+    List<String>? targetUserIds,
+    required String title,
+    required String body,
+  }) async {
+    try {
+      await client.functions.invoke(
+        'efeler-notify',
+        body: {
+          'type': type,
+          'title': title,
+          'body': body,
+          if (refId != null) 'ref_id': refId,
+          if (targetUserIds != null) 'target_user_ids': targetUserIds,
+        },
+      );
+    } catch (_) {
+      // Notification delivery is best-effort.
+    }
+  }
+
+  /// Get user IDs of members who have a booked reservation for a run.
+  Future<List<String>> getRunReservedUserIds(String runId) async {
+    final rows = await client
+        .from('efeler_reservations')
+        .select('member_id')
+        .eq('app_id', 'efeler')
+        .eq('run_id', runId)
+        .eq('status', 'booked');
+    return List<Map<String, dynamic>>.from(rows)
+        .map((r) => r['member_id'] as String)
+        .toList();
+  }
+
   String _code(dynamic value) {
     if (value is Map) return value['code'] as String? ?? 'unknown';
     if (value is List && value.isNotEmpty) {
