@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../core/providers/providers.dart';
 
@@ -22,9 +23,18 @@ class ProfileScreen extends ConsumerWidget {
                 error: (_, _) => const Text('Profil yüklenemedi.'),
                 data: (p) => Column(
                   children: [
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 36,
-                      child: Icon(Icons.person, size: 36),
+                      backgroundImage: p.avatarPath == null
+                          ? null
+                          : NetworkImage(
+                              ref
+                                  .read(repositoryProvider)
+                                  .mediaUrl(p.avatarPath!),
+                            ),
+                      child: p.avatarPath == null
+                          ? const Icon(Icons.person, size: 36)
+                          : null,
                     ),
                     const SizedBox(height: 12),
                     Text(
@@ -60,6 +70,12 @@ class ProfileScreen extends ConsumerWidget {
             ),
           ],
           ListTile(
+            leading: const Icon(Icons.add_a_photo_outlined),
+            title: const Text('Profil fotoğrafını değiştir'),
+            subtitle: const Text('Fotoğraf arşivinden bir görsel seç'),
+            onTap: () => _pickAvatar(context, ref),
+          ),
+          ListTile(
             leading: const Icon(Icons.edit_outlined),
             title: const Text('Profilimi düzenle'),
             subtitle: const Text('Adını ve kısa antrenör bilgini güncelle'),
@@ -91,6 +107,34 @@ class ProfileScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _pickAvatar(BuildContext context, WidgetRef ref) async {
+    try {
+      final file = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1200,
+        imageQuality: 85,
+        requestFullMetadata: false,
+      );
+      if (file == null) return;
+      await ref
+          .read(repositoryProvider)
+          .uploadProfileAvatar(await file.readAsBytes());
+      ref.invalidate(profileProvider);
+      ref.invalidate(runsProvider);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profil fotoğrafın güncellendi.')),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Fotoğraf yüklenemedi.')));
+      }
+    }
   }
 
   Future<void> _edit(

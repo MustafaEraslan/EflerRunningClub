@@ -54,6 +54,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               label: Text(canManageRuns ? 'KOŞU PLANLA' : 'QR TARA'),
             )
+          : index == 1 && canManageRuns
+          ? FloatingActionButton.extended(
+              onPressed: () => context.push('/rewards/new'),
+              icon: const Icon(Icons.add_photo_alternate_outlined),
+              label: const Text('ÖDÜL EKLE'),
+            )
           : null,
       bottomNavigationBar: NavigationBar(
         selectedIndex: index,
@@ -132,16 +138,25 @@ class RunsTab extends ConsumerWidget {
               const SizedBox(height: 10),
               InkWell(
                 borderRadius: BorderRadius.circular(14),
-                onTap: () => _showCoach(context, run),
+                onTap: () => _showCoach(context, ref, run),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 6),
                   child: Row(
                     children: [
-                      const CircleAvatar(
+                      CircleAvatar(
                         radius: 17,
                         backgroundColor: Color(0xFFCCFF00),
                         foregroundColor: Colors.black,
-                        child: Icon(Icons.sports, size: 18),
+                        backgroundImage: run.coachAvatarPath == null
+                            ? null
+                            : NetworkImage(
+                                ref
+                                    .read(repositoryProvider)
+                                    .mediaUrl(run.coachAvatarPath!),
+                              ),
+                        child: run.coachAvatarPath == null
+                            ? const Icon(Icons.sports, size: 18)
+                            : null,
                       ),
                       const SizedBox(width: 10),
                       Expanded(
@@ -247,7 +262,7 @@ class RunsTab extends ConsumerWidget {
     );
   }
 
-  void _showCoach(BuildContext context, ClubRun run) {
+  void _showCoach(BuildContext context, WidgetRef ref, ClubRun run) {
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -256,7 +271,19 @@ class RunsTab extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircleAvatar(radius: 34, child: Icon(Icons.sports, size: 34)),
+            CircleAvatar(
+              radius: 34,
+              backgroundImage: run.coachAvatarPath == null
+                  ? null
+                  : NetworkImage(
+                      ref
+                          .read(repositoryProvider)
+                          .mediaUrl(run.coachAvatarPath!),
+                    ),
+              child: run.coachAvatarPath == null
+                  ? const Icon(Icons.sports, size: 34)
+                  : null,
+            ),
             const SizedBox(height: 12),
             Text(run.coachName, style: Theme.of(context).textTheme.titleLarge),
             const Text(
@@ -313,20 +340,35 @@ class RewardsTab extends ConsumerWidget {
     empty: 'Şu anda aktif ödül yok.',
     onRefresh: () => ref.refresh(rewardsProvider.future),
     itemBuilder: (reward) => Card(
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(16),
-        leading: const CircleAvatar(child: Icon(Icons.checkroom)),
-        title: Text(reward.name),
-        subtitle: Text(
-          '${reward.description}\n${reward.stock > 0 ? '${reward.stock} adet kaldı' : 'Stokta yok'}',
-        ),
-        isThreeLine: true,
-        trailing: FilledButton.tonal(
-          onPressed: reward.stock < 1
-              ? null
-              : () => _redeem(context, ref, reward),
-          child: Text('${reward.pointsCost} puan'),
-        ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (reward.imagePath != null)
+            Image.network(
+              ref.read(repositoryProvider).mediaUrl(reward.imagePath!),
+              height: 170,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => const SizedBox.shrink(),
+            ),
+          ListTile(
+            contentPadding: const EdgeInsets.all(16),
+            leading: reward.imagePath == null
+                ? const CircleAvatar(child: Icon(Icons.checkroom))
+                : null,
+            title: Text(reward.name),
+            subtitle: Text(
+              '${reward.description}\n${reward.stock > 0 ? '${reward.stock} adet kaldı' : 'Stokta yok'}',
+            ),
+            isThreeLine: true,
+            trailing: FilledButton.tonal(
+              onPressed: reward.stock < 1
+                  ? null
+                  : () => _redeem(context, ref, reward),
+              child: Text('${reward.pointsCost} puan'),
+            ),
+          ),
+        ],
       ),
     ),
   );

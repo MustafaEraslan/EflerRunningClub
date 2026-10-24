@@ -4,17 +4,20 @@ class Profile {
     required this.fullName,
     required this.role,
     required this.bio,
+    required this.avatarPath,
   });
   final String id;
   final String fullName;
   final String role;
   final String bio;
+  final String? avatarPath;
   bool get canManageRuns => role == 'coach' || role == 'admin';
   factory Profile.fromJson(Map<String, dynamic> json) => Profile(
     id: json['id'] as String,
     fullName: json['full_name'] as String? ?? '',
     role: json['role'] as String? ?? 'member',
     bio: json['bio'] as String? ?? '',
+    avatarPath: json['avatar_path'] as String?,
   );
 }
 
@@ -24,16 +27,19 @@ class ClubMember {
     required this.fullName,
     required this.role,
     required this.bio,
+    required this.avatarPath,
   });
   final String id;
   final String fullName;
   final String role;
   final String bio;
+  final String? avatarPath;
   factory ClubMember.fromJson(Map<String, dynamic> json) => ClubMember(
     id: json['id'] as String,
     fullName: json['full_name'] as String? ?? '',
     role: json['role'] as String? ?? 'member',
     bio: json['bio'] as String? ?? '',
+    avatarPath: json['avatar_path'] as String?,
   );
 }
 
@@ -50,6 +56,7 @@ class ClubRun {
     required this.isReserved,
     required this.coachName,
     required this.coachBio,
+    required this.coachAvatarPath,
   });
   final String id;
   final String title;
@@ -62,6 +69,7 @@ class ClubRun {
   final bool isReserved;
   final String coachName;
   final String coachBio;
+  final String? coachAvatarPath;
   int get availableSpots => capacity - reservedCount;
   factory ClubRun.fromJson(Map<String, dynamic> json) => ClubRun(
     id: json['id'] as String,
@@ -75,6 +83,7 @@ class ClubRun {
     isReserved: json['is_reserved'] as bool? ?? false,
     coachName: json['coach_name'] as String? ?? 'Antrenör',
     coachBio: json['coach_bio'] as String? ?? '',
+    coachAvatarPath: json['coach_avatar_path'] as String?,
   );
 }
 
@@ -85,17 +94,20 @@ class Reward {
     required this.description,
     required this.pointsCost,
     required this.stock,
+    required this.imagePath,
   });
   final String id;
   final String name;
   final String description;
   final int pointsCost;
   final int stock;
+  final String? imagePath;
   factory Reward.fromJson(Map<String, dynamic> json) => Reward(
     id: json['id'] as String,
     name: json['name'] as String,
     description: json['description'] as String? ?? '',
     pointsCost: json['points_cost'] as int,
     stock: json['stock'] as int,
+    imagePath: json['image_url'] as String?,
   );
 }

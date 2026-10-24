@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -104,6 +105,33 @@ class ClubRepository {
       )
       .then((_) {});
 
+  String mediaUrl(String path) =>
+      client.storage.from('efeler-media').getPublicUrl(path);
+
+  Future<void> uploadProfileAvatar(Uint8List bytes) async {
+    final path = 'avatars/${user!.id}.jpg';
+    await client.storage
+        .from('efeler-media')
+        .uploadBinary(
+          path,
+          bytes,
+          fileOptions: const FileOptions(
+            contentType: 'image/jpeg',
+            upsert: true,
+            cacheControl: '3600',
+          ),
+        );
+    final profile = await getProfile();
+    await client.rpc(
+      'efeler_update_profile',
+      params: {
+        'p_full_name': profile.fullName,
+        'p_bio': profile.bio,
+        'p_avatar_path': path,
+      },
+    );
+  }
+
   Future<List<ClubMember>> getMembers() async {
     final data = await client.rpc('efeler_list_members');
     final rows = List<Map<String, dynamic>>.from(data as List);
@@ -129,6 +157,43 @@ class ClubRepository {
         .order('points_cost');
     final rows = List<Map<String, dynamic>>.from(data);
     return rows.map(Reward.fromJson).toList(growable: false);
+  }
+
+  Future<String> createReward({
+    required String name,
+    required String description,
+    required int pointsCost,
+    required int stock,
+  }) async {
+    final data = await client.rpc(
+      'efeler_create_reward',
+      params: {
+        'p_name': name.trim(),
+        'p_description': description.trim(),
+        'p_points_cost': pointsCost,
+        'p_stock': stock,
+      },
+    );
+    return data as String;
+  }
+
+  Future<void> uploadRewardImage(String rewardId, Uint8List bytes) async {
+    final path = 'rewards/$rewardId.jpg';
+    await client.storage
+        .from('efeler-media')
+        .uploadBinary(
+          path,
+          bytes,
+          fileOptions: const FileOptions(
+            contentType: 'image/jpeg',
+            upsert: true,
+            cacheControl: '3600',
+          ),
+        );
+    await client.rpc(
+      'efeler_set_reward_image',
+      params: {'p_reward_id': rewardId, 'p_image_path': path},
+    );
   }
 
   Future<int> getBalance() async {
